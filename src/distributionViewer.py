@@ -86,8 +86,8 @@ class distributionDataMgr(object):
                 if data > 750: 
                     #print(data)
                     continue
-                gv.iChartPanel0.dataD[data] += 1\
-        
+                gv.iChartPanel0.dataD[data] += 1
+                gv.iChartPanel0.color = 0
         print(gv.iChartPanel0.dataD)
         print("--")
         # read the data files:
@@ -101,7 +101,8 @@ class distributionDataMgr(object):
                     #print(data)
                     continue
                 gv.iChartPanel1.dataD[data] += 1
-        
+                gv.iChartPanel1.color = 1
+
         print(gv.iChartPanel1.dataD)
 
 #-----------------------------------------------------------------------------

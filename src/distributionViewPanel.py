@@ -34,6 +34,7 @@ class PanelChart(wx.Panel):
         self.dataD = [0]*750
         self.times = [n for n in range(76)]
         self.Bind(wx.EVT_PAINT, self.OnPaint)
+        self.color = 0
 
 #--PanelChart--------------------------------------------------------------------
     def appendData(self, numsList):
@@ -78,9 +79,15 @@ class PanelChart(wx.Panel):
             dc.DrawText(label, idx*60+115, 220)
             dc.DrawLine(100+idx*60, 212, 100+idx*60+8, 212)
             # Create the point list and draw.
-        
-        print(int(self.dataD[0]*1.5))
-        dc.DrawSpline([(int(i*1.5), int(self.dataD[i])) for i in range(750)])
+            
+        #print(int(self.dataD[0]*1.5))
+
+        if self.color == 0:
+            dc.SetPen(wx.Pen('#0AB1FF', width=2, style=wx.PENSTYLE_SOLID))
+        else:
+            dc.SetPen(wx.Pen('#CE8349', width=2, style=wx.PENSTYLE_SOLID))
+
+        dc.DrawSpline([(int(i*1.5), int(self.dataD[i])*2) for i in range(750)])
 
 #--PanelChart--------------------------------------------------------------------
     def updateDisplay(self, updateFlag=None):
