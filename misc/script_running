@@ -1,0 +1,65 @@
+sav@deb:netFetcher$ cat scripted_exp.bat
+Run: 127.0.0.1:5555 biggerFile:1 1000 exp1
+Sleep 1
+
+Run: 127.0.0.1:5555 biggerFile:1 30000 exp1
+Sleep 1
+
+Run: 127.0.0.1:5555 biggerFile:64 30000 exp6
+Sleep 1
+
+Run: 127.0.0.1:5555 biggerFile:256 30000 exp8
+Sleep 1
+
+Run: 127.0.0.1:5555 biggerFile:512 30000 exp9
+Sleep 1
+
+Run: 127.0.0.1:5555 biggerFile:1024 30000 exp10
+Sleep 1
+
+sav@deb:netFetcher$ ./compile-all.sh lin st
+Cleaning build artifacts.
+Killing client and server processes.
+verifier: no process found
+prover: no process found
+Preparing file descriptor.
+Compiling for Linux...
+Server code (Prover.c) Compiled. Binary: ./prover
+Client code (Verifier.c) Compiled. Binary: ./verifier
+Running prover on default port 5555.
+sav@deb:netFetcher$ Prover server running on port:5555
+
+sav@deb:netFetcher$
+sav@deb:netFetcher$
+sav@deb:netFetcher$
+sav@deb:netFetcher$
+sav@deb:netFetcher$ ./verifier -h
+
+Usage:
+./verifier <prover-server-addr> <file-id> <iteration-count>
+
+Options:
+    prover-server-addr: The address of the storage server to be challenged.
+        file-id: The identifier for the file or the block size of that will be used as a challenge.
+	    iteration-count: The number of times that the challenge will be repeated.
+
+sav@deb:netFetcher$ ./verifier 127.0.0.1:5555 biggerFile:1024 30000
+Sending requests to 127.0.0.1:5555
+Challenging server with file: ./files/biggerFile for 30000 times.
+.
+Experiment Completed.
+Total experiment time: 5.280090575 seconds
+sav@deb:netFetcher$ head exp-output.csv
+exp:1564731070825504512,127.0.0.1,1073741824,1024
+1564731070825691,1676,24864,15504,16692,146178
+1564731070825991,1676,9848,9079,6146,79410
+1564731070826194,1327,8311,7543,194648,281251
+1564731070826623,1466,8381,4191,5308,46165
+1564731070826780,1327,6705,6705,35340,80597
+1564731070826975,1397,8171,9079,5099,60343
+1564731070827137,1397,6914,3771,5169,44070
+1564731070827279,1327,6635,7124,4051,45537
+1564731070827431,1327,5518,6216,191295,231873
+sav@deb:netFetcher$ rm -rf exp-output.csv
+sav@deb:netFetcher$
+
