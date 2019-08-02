@@ -9,7 +9,7 @@
 # Author:      Yuancheng Liu
 #
 # Created:     2019/08/02
-# Copyright:   NUS - Singtel Cyber Security Research & Development Laboratory
+# Copyright:   NUS-Singtel Cyber Security Research & Development Laboratory
 # License:     YC @ NUS
 #-----------------------------------------------------------------------------
 
