@@ -4,7 +4,7 @@
 # Name:        distributionViewPanel.py
 #
 # Purpose:     This module is used to provide different function panels for the 
-#              XAKAsensorReader. 
+#              distributionViewer. 
 #              
 # Author:      Yuancheng Liu
 #
@@ -15,27 +15,25 @@
 
 import wx
 import wx.grid
-import random
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelChart(wx.Panel):
-    """ This function is used to provide lineChart wxPanel to show the history 
-        of the people counting sensor's data.
+    """ This function is used to provide lineChart wxPanel to show the all the 
+        data as a distribution line.
     """
     def __init__(self, parent, recNum=750):
         """ Init the panel."""
         wx.Panel.__init__(self, parent, size=(1200, 300))
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
-        self.recNum = recNum
+        self.recNum = recNum #hole many revode we are going to show.
         self.updateFlag = True  # flag whether we update the diaplay area
-        # [(current num, average num, final num)]*60
         self.data = [(0, 0, 0)] * self.recNum
+        self.colorIdx = 0   # color index.
         self.dataD = [0]*750
-        self.times = [n for n in range(76)]
+        self.times = [n for n in range(recNum//10)] # X-Axis.
         self.Bind(wx.EVT_PAINT, self.OnPaint)
-        self.color = 0
-
+        
 #--PanelChart--------------------------------------------------------------------
     def appendData(self, numsList):
         """ Append the data into the data hist list.
@@ -48,12 +46,12 @@ class PanelChart(wx.Panel):
     def drawBG(self, dc):
         """ Draw the line chart background."""
         dc.SetPen(wx.Pen('WHITE'))
-        dc.DrawRectangle(1, 1, 1150, 200)
+        dc.DrawRectangle(1, 1, 1150, 204)
         # DrawTitle:
         font = dc.GetFont()
         font.SetPointSize(8)
         dc.SetFont(font)
-        dc.DrawText('NetFetcher distribution  data', 2, 235)
+        dc.DrawText('NetFetcher Data Distribution', 2, 235)
         # Draw Axis and Grids:(Y-people count X-time)
         dc.SetPen(wx.Pen('#D5D5D5')) #dc.SetPen(wx.Pen('#0AB1FF'))
         dc.DrawLine(1, 1, 1200, 1)
@@ -79,14 +77,11 @@ class PanelChart(wx.Panel):
             dc.DrawText(label, idx*60+115, 220)
             dc.DrawLine(100+idx*60, 212, 100+idx*60+8, 212)
             # Create the point list and draw.
-            
-        #print(int(self.dataD[0]*1.5))
-
-        if self.color == 0:
+        # Draw the distribution line: 
+        if self.colorIdx == 0:
             dc.SetPen(wx.Pen('#0AB1FF', width=2, style=wx.PENSTYLE_SOLID))
         else:
             dc.SetPen(wx.Pen('#CE8349', width=2, style=wx.PENSTYLE_SOLID))
-
         dc.DrawSpline([(int(i*1.5), int(self.dataD[i])*2) for i in range(750)])
 
 #--PanelChart--------------------------------------------------------------------
@@ -112,21 +107,15 @@ class PanelChart(wx.Panel):
         self.drawFG(dc)
 
 
-
-class PanelMultInfo(wx.Panel):
-    """ Mutli-information display panel used to show all sensors' detection 
-        situation on the office top-view map, sensor connection status and a 
-        wx.Grid to show all the sensors' basic detection data.
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class PanelSetting(wx.Panel):
+    """  Setting panel used to show the 
     """
     def __init__(self, parent):
         """ Init the panel."""
         wx.Panel.__init__(self, parent, size=(350, 300))
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
-        self.mapPanel = None
-        self.sensorCount = 1    # total sensor count.
-        #self.totPllNum = 0      # total current number of people detected
-        #self.totPllAvg = 0      # total avg number of people detected 
-        self.senIndList = []    # sensor indicator list.
         self.SetSizer(self.buidUISizer())
 
 #--PanelMultInfo---------------------------------------------------------------
@@ -149,13 +138,13 @@ class PanelMultInfo(wx.Panel):
         self.grid.SetColSize(0, 100)
         self.grid.SetColSize(1, 100)
         self.grid.SetColSize(2, 100)
-        self.grid.SetColSize(2, 100)
+        self.grid.SetColSize(3, 150)
         # Set the Grid's labels.
         self.grid.SetColLabelValue(0, 'IP address')
         self.grid.SetColLabelValue(1, 'File ID ')
         self.grid.SetColLabelValue(2, 'Block Num')
-        self.grid.SetColLabelValue(3, 'Output')
-        self.grid.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.highLightMap)
+        self.grid.SetColLabelValue(3, 'Output file')
+        #self.grid.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.highLightMap)
         sizer.Add(self.grid, flag=flagsR, border=2)
         return sizer
 

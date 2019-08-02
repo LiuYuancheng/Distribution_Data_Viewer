@@ -2,9 +2,8 @@
 #-----------------------------------------------------------------------------
 # Name:        distributionView.py
 #
-# Purpose:     This module is used to read the data from XAKA people counting
-#              sensor and show the data in the user interface.(sucfunctions: 
-#              register the sensor to the server, automaticall detect the sensor)
+# Purpose:     This module is used to read the data from serveral CSV file and 
+#              draw the distribution diagram.
 #             
 # Author:      Yuancheng Liu
 #
@@ -15,60 +14,54 @@
 
 import io, sys
 import csv
-import platform
-import glob
 import wx # use wx to build the UI.
-import time
-import serial
-import threading
-import random
 import distributionViewGlobal as gv
 import distributionViewPanel as dvp
 
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 class distributionViewFrame(wx.Frame):
-    """ XAKA people counting sensor reader with sensor registration function. """
+    """ Main frame of the distribution viewer."""
     def __init__(self, parent, id, title):
         """ Init the UI and all parameters """
         wx.Frame.__init__(self, parent, id, title, size=(1200, 700))
         #self.SetIcon(wx.Icon(gv.ICON_PATH))
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
-
-        # Init the UI.
         self.SetSizer(self.buildUISizer())
-        self.mgr = distributionDataMgr(self)
-
-
+        # The data manager.
+        self.dataMgr = distributionDataMgr(self)
+        gv.iChartPanel0.colorIdx = 0
+        gv.iChartPanel1.colorIdx = 1
+#-----------------------------------------------------------------------------
     def buildUISizer(self):
         """ Init the frame user interface and return the sizer."""
         sizer = wx.BoxSizer(wx.HORIZONTAL)
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         nb = wx.Notebook(self)
+        # Page 1: data distribution graph.
         ntbgPage1 = wx.Panel(nb)
-        nb.AddPage(ntbgPage1, "Data display")
-        hboxPg1= wx.BoxSizer(wx.VERTICAL)
-        linechart1 = dvp.PanelChart(ntbgPage1, recNum=60)
-        gv.iChartPanel0 = linechart1
+        nb.AddPage(ntbgPage1, "Data Display")
+        hboxPg1 = wx.BoxSizer(wx.VERTICAL)
+        gv.iChartPanel0 = linechart1 = dvp.PanelChart(ntbgPage1, recNum=760)
         hboxPg1.Add(linechart1, flag=flagsR, border=2)
         hboxPg1.AddSpacer(5)
         hboxPg1.Add(wx.StaticLine(ntbgPage1, wx.ID_ANY, size=(1200, -1),
-                                     style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+                                  style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         hboxPg1.AddSpacer(5)
-        linechart2 = dvp.PanelChart(ntbgPage1, recNum=160)
-        gv.iChartPanel1 = linechart2
+        gv.iChartPanel1 = linechart2 = dvp.PanelChart(ntbgPage1, recNum=760)
         hboxPg1.Add(linechart2, flag=flagsR, border=2)
-        self.pauseBt = wx.Button(ntbgPage1, label='Reload Data', style=wx.BU_LEFT, size=(80, 23))
+        self.pauseBt = wx.Button(
+            ntbgPage1, label='Reload Data', style=wx.BU_LEFT, size=(80, 23))
         hboxPg1.Add(self.pauseBt, flag=flagsR, border=2)
-        
         ntbgPage1.SetSizer(hboxPg1)
-
-        #ntbgPage2 = wx.Panel(nb)
-
-        ntbgPage2 = dvp.PanelMultInfo(nb)
+        # Page 2 : program setting
+        ntbgPage2 = dvp.PanelSetting(nb)
         nb.AddPage(ntbgPage2, "Setting")
         sizer.Add(nb, 1, wx.EXPAND)
         return sizer
 
-
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
 class distributionDataMgr(object):
     """ distritutionDataMgr to process the csv files.
     """
@@ -79,31 +72,22 @@ class distributionDataMgr(object):
         # read the module files: 
         with open(gv.MODE_F_PATH) as f:
             f_csv = csv.reader(f)
-            header = next(f_csv)
+            _ = next(f_csv) # skip the csv header.
             for row in f_csv:
-                #print((row[3],row[4]))
-                data = (int(row[3])+int(row[4]))//1000
-                if data > 750: 
-                    #print(data)
-                    continue
-                gv.iChartPanel0.dataD[data] += 1
-                gv.iChartPanel0.color = 0
-        print(gv.iChartPanel0.dataD)
-        print("--")
+                idx = (int(row[3])+int(row[4]))//1000
+                if idx > 750: continue # filter the too big data.
+                gv.iChartPanel0.dataD[idx] += 1              
+        # print(gv.iChartPanel0.dataD)
+
         # read the data files:
         with open(gv.MODE_F_PATH) as f:
             f_csv = csv.reader(f)
-            header = next(f_csv)
+            _ = next(f_csv)
             for row in f_csv:
-                #print((row[3],row[4]))
                 data = (int(row[3])+int(row[4]))//1000
-                if data > 750: 
-                    #print(data)
-                    continue
+                if data > 750: continue
                 gv.iChartPanel1.dataD[data] += 1
-                gv.iChartPanel1.color = 1
-
-        print(gv.iChartPanel1.dataD)
+        # print(gv.iChartPanel1.dataD)
 
 #-----------------------------------------------------------------------------
 class MyApp(wx.App):
@@ -112,5 +96,6 @@ class MyApp(wx.App):
         mainFrame = distributionViewFrame(None, -1, gv.APP_NAME)
         mainFrame.Show(True)
         return True
+
 app = MyApp(0)
 app.MainLoop()
