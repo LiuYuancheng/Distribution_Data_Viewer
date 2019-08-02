@@ -8,7 +8,7 @@
 # Author:      Yuancheng Liu
 #
 # Created:     2019/08/02
-# Copyright:   NUS – Singtel Cyber Security Research & Development Laboratory
+# Copyright:   NUS - ingtel Cyber Security Research & Development Laboratory
 # License:     YC @ NUS
 #-----------------------------------------------------------------------------
 
@@ -80,7 +80,7 @@ class distributionDataMgr(object):
         # print(gv.iChartPanel0.dataD)
 
         # read the data files:
-        with open(gv.MODE_F_PATH) as f:
+        with open(gv.DATA_F_PATH) as f:
             f_csv = csv.reader(f)
             _ = next(f_csv)
             for row in f_csv:
