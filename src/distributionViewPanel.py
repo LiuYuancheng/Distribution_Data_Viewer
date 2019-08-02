@@ -8,7 +8,7 @@
 #              
 # Author:      Yuancheng Liu
 #
-# Created:     2019/06/24
+# Created:     2019/08/02
 # Copyright:   NUS – Singtel Cyber Security Research & Development Laboratory
 # License:     YC @ NUS
 #-----------------------------------------------------------------------------
@@ -23,7 +23,7 @@ class PanelChart(wx.Panel):
     """ This function is used to provide lineChart wxPanel to show the history 
         of the people counting sensor's data.
     """
-    def __init__(self, parent, recNum=60):
+    def __init__(self, parent, recNum=750):
         """ Init the panel."""
         wx.Panel.__init__(self, parent, size=(1200, 300))
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
@@ -31,6 +31,7 @@ class PanelChart(wx.Panel):
         self.updateFlag = True  # flag whether we update the diaplay area
         # [(current num, average num, final num)]*60
         self.data = [(0, 0, 0)] * self.recNum
+        self.dataD = [0]*750
         self.times = [n for n in range(76)]
         self.Bind(wx.EVT_PAINT, self.OnPaint)
 
@@ -77,7 +78,9 @@ class PanelChart(wx.Panel):
             dc.DrawText(label, idx*60+115, 220)
             dc.DrawLine(100+idx*60, 212, 100+idx*60+8, 212)
             # Create the point list and draw.
-            dc.DrawSpline([(i*5, self.data[i][idx]*10) for i in range(self.recNum)])
+        
+        print(int(self.dataD[0]*1.5))
+        dc.DrawSpline([(int(i*1.5), int(self.dataD[i])) for i in range(750)])
 
 #--PanelChart--------------------------------------------------------------------
     def updateDisplay(self, updateFlag=None):

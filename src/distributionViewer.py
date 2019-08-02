@@ -14,6 +14,7 @@
 #-----------------------------------------------------------------------------
 
 import io, sys
+import csv
 import platform
 import glob
 import wx # use wx to build the UI.
@@ -34,6 +35,8 @@ class distributionViewFrame(wx.Frame):
 
         # Init the UI.
         self.SetSizer(self.buildUISizer())
+        self.mgr = distributionDataMgr(self)
+
 
     def buildUISizer(self):
         """ Init the frame user interface and return the sizer."""
@@ -44,12 +47,14 @@ class distributionViewFrame(wx.Frame):
         nb.AddPage(ntbgPage1, "Data display")
         hboxPg1= wx.BoxSizer(wx.VERTICAL)
         linechart1 = dvp.PanelChart(ntbgPage1, recNum=60)
+        gv.iChartPanel0 = linechart1
         hboxPg1.Add(linechart1, flag=flagsR, border=2)
         hboxPg1.AddSpacer(5)
         hboxPg1.Add(wx.StaticLine(ntbgPage1, wx.ID_ANY, size=(1200, -1),
                                      style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         hboxPg1.AddSpacer(5)
         linechart2 = dvp.PanelChart(ntbgPage1, recNum=160)
+        gv.iChartPanel1 = linechart2
         hboxPg1.Add(linechart2, flag=flagsR, border=2)
         self.pauseBt = wx.Button(ntbgPage1, label='Reload Data', style=wx.BU_LEFT, size=(80, 23))
         hboxPg1.Add(self.pauseBt, flag=flagsR, border=2)
@@ -62,6 +67,42 @@ class distributionViewFrame(wx.Frame):
         nb.AddPage(ntbgPage2, "Setting")
         sizer.Add(nb, 1, wx.EXPAND)
         return sizer
+
+
+class distributionDataMgr(object):
+    """ distritutionDataMgr to process the csv files.
+    """
+    def __init__(self, parent):
+        """ Init all the element on the map. All the parameters are public to other 
+            module.
+        """ 
+        # read the module files: 
+        with open(gv.MODE_F_PATH) as f:
+            f_csv = csv.reader(f)
+            header = next(f_csv)
+            for row in f_csv:
+                #print((row[3],row[4]))
+                data = (int(row[3])+int(row[4]))//1000
+                if data > 750: 
+                    #print(data)
+                    continue
+                gv.iChartPanel0.dataD[data] += 1\
+        
+        print(gv.iChartPanel0.dataD)
+        print("--")
+        # read the data files:
+        with open(gv.MODE_F_PATH) as f:
+            f_csv = csv.reader(f)
+            header = next(f_csv)
+            for row in f_csv:
+                #print((row[3],row[4]))
+                data = (int(row[3])+int(row[4]))//1000
+                if data > 750: 
+                    #print(data)
+                    continue
+                gv.iChartPanel1.dataD[data] += 1
+        
+        print(gv.iChartPanel1.dataD)
 
 #-----------------------------------------------------------------------------
 class MyApp(wx.App):
