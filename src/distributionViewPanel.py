@@ -22,17 +22,18 @@ class PanelChart(wx.Panel):
     """ This function is used to provide lineChart wxPanel to show the all the 
         data as a distribution line.
     """
-    def __init__(self, parent, recNum=750):
+    def __init__(self, parent, dataSetNum, appSize=(1600, 280), recNum=750):
         """ Init the panel."""
-        wx.Panel.__init__(self, parent, size=(1200, 300))
+        wx.Panel.__init__(self, parent, size=(appSize[0], 280))
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
-        self.recNum = recNum #hole many revode we are going to show.
+        self.recNum = recNum    # hole many revode we are going to show.
+        self.appSize = appSize
         self.updateFlag = True  # flag whether we update the diaplay area
-        self.data = [(0, 0, 0)] * self.recNum
-        self.colorIdx = 0   # color index.
-        self.dataD = [0]*750
-        self.times = [n for n in range(recNum//10)] # X-Axis.
+        self.colorIdx = 0       # color index.
+        self.dataD = [[0]*self.recNum]*dataSetNum
+        self.times = [n for n in range(self.recNum//10)] # X-Axis.
         self.Bind(wx.EVT_PAINT, self.OnPaint)
+        
         
 #--PanelChart--------------------------------------------------------------------
     def appendData(self, numsList):
@@ -46,7 +47,7 @@ class PanelChart(wx.Panel):
     def drawBG(self, dc):
         """ Draw the line chart background."""
         dc.SetPen(wx.Pen('WHITE'))
-        dc.DrawRectangle(1, 1, 1150, 204)
+        dc.DrawRectangle(1, 1, self.appSize[0], 205)
         # DrawTitle:
         font = dc.GetFont()
         font.SetPointSize(8)
@@ -54,16 +55,17 @@ class PanelChart(wx.Panel):
         dc.DrawText('NetFetcher Data Distribution', 2, 235)
         # Draw Axis and Grids:(Y-people count X-time)
         dc.SetPen(wx.Pen('#D5D5D5')) #dc.SetPen(wx.Pen('#0AB1FF'))
-        dc.DrawLine(1, 1, 1200, 1)
-        dc.DrawLine(1, 1, 1, 200)
+        w, _ = self.appSize 
+        dc.DrawLine(1, 1, w, 1)
+        dc.DrawLine(1, 1, 1, w)
         for i in range(2, 22, 2):
-            dc.DrawLine(2, i*10, 1200, i*10) # Y-Grid
+            dc.DrawLine(2, i*10, w, i*10) # Y-Grid
             dc.DrawLine(2, i*10, -5, i*10)  # Y-Axis
             dc.DrawText(str(i).zfill(2), -25, i*10+5)  # format to ## int, such as 02
         for i in range(len(self.times)): 
-            dc.DrawLine(i*15, 2, i*15, 200) # X-Grid
-            dc.DrawLine(i*15, 2, i*15, -5)  # X-Axis
-            dc.DrawText(str(self.times[i]), i*15-10, -5)
+            dc.DrawLine(i*20, 2, i*20, 200) # X-Grid
+            dc.DrawLine(i*20, 2, i*20, -5)  # X-Axis
+            dc.DrawText(str(self.times[i]).zfill(2), i*20-5, -5)
         
 #--PanelChart--------------------------------------------------------------------
     def drawFG(self, dc):
@@ -82,7 +84,7 @@ class PanelChart(wx.Panel):
             dc.SetPen(wx.Pen('#0AB1FF', width=2, style=wx.PENSTYLE_SOLID))
         else:
             dc.SetPen(wx.Pen('#CE8349', width=2, style=wx.PENSTYLE_SOLID))
-        dc.DrawSpline([(int(i*1.5), int(self.dataD[i])*2) for i in range(750)])
+        dc.DrawSpline([(int(i*1.5), int(self.dataD[0][i])*2) for i in range(750)])
 
 #--PanelChart--------------------------------------------------------------------
     def updateDisplay(self, updateFlag=None):
@@ -101,10 +103,20 @@ class PanelChart(wx.Panel):
         """ Main panel drawing function."""
         dc = wx.PaintDC(self)
         # set the axis orientation area and fmt to up + right direction.
-        dc.SetDeviceOrigin(40, 240)
+        dc.SetDeviceOrigin(40, 250)
         dc.SetAxisOrientation(True, True)
         self.drawBG(dc)
         self.drawFG(dc)
+
+    def periodic(self, event):
+        """ Call back every periodic time."""
+        # Set the title of the frame.
+        self.SetTitle( ' '.join((gv.APP_NAME, datetime.now().strftime("[ %m/%d/%Y, %H:%M:%S ]"))))
+        if gv.iEmgStop: return
+        timeStr = time.time()
+        self.mapPanel.periodic(timeStr)
+
+
 
 
 #-----------------------------------------------------------------------------
