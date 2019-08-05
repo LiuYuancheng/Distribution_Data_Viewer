@@ -22,19 +22,22 @@ class PanelChart(wx.Panel):
     """ This function is used to provide lineChart wxPanel to show the all the 
         data as a distribution line.
     """
-    def __init__(self, parent, dataSetNum, appSize=(1600, 280), recNum=750):
+    def __init__(self, parent, dataSetNum, appSize=(1600, 290), recNum=750):
         """ Init the panel."""
-        wx.Panel.__init__(self, parent, size=(appSize[0], 280))
+        wx.Panel.__init__(self, parent, size=(appSize[0], 290))
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.recNum = recNum    # hole many revode we are going to show.
         self.appSize = appSize
         self.updateFlag = True  # flag whether we update the diaplay area
         self.colorIdx = 0       # color index.
-        self.dataD = [[0]*self.recNum]*dataSetNum
+        self.dataSetNum = dataSetNum
+        self.dataD =[[0]*recNum for _ in range(dataSetNum)]
         self.times = [n for n in range(self.recNum//10)] # X-Axis.
         self.Bind(wx.EVT_PAINT, self.OnPaint)
         
-        
+    def clearData(self):
+        self.dataD =[[0]*self.recNum for _ in range(self.dataSetNum)]
+
 #--PanelChart--------------------------------------------------------------------
     def appendData(self, numsList):
         """ Append the data into the data hist list.
@@ -52,7 +55,10 @@ class PanelChart(wx.Panel):
         font = dc.GetFont()
         font.SetPointSize(8)
         dc.SetFont(font)
-        dc.DrawText('NetFetcher Data Distribution', 2, 235)
+        dc.DrawText('NetFetcher Data Distribution', 2, 245)
+        dc.DrawText('occurences[x10]', -35, 225)
+        dc.DrawText('Delay[x1000 ns]', 700, -25)
+
         # Draw Axis and Grids:(Y-people count X-time)
         dc.SetPen(wx.Pen('#D5D5D5')) #dc.SetPen(wx.Pen('#0AB1FF'))
         w, _ = self.appSize 
@@ -72,19 +78,22 @@ class PanelChart(wx.Panel):
         """ Draw the front ground data chart line."""
         # draw item (Label, color)
         item = (('Data1', '#0AB1FF'), ('Data2', '#CE8349'), ('Data3', '#A5CDAA'))
-        for idx in range(3):
+        for idx in range(len(self.dataD)):
             (label, color) = item[idx]
             # Draw the line sample.
             dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
             dc.DrawText(label, idx*60+115, 220)
             dc.DrawLine(100+idx*60, 212, 100+idx*60+8, 212)
+            
+            dc.DrawSpline([(int(i*2+idx*2), int(self.dataD[idx][i])*1) for i in range(self.recNum)])
+
             # Create the point list and draw.
         # Draw the distribution line: 
-        if self.colorIdx == 0:
-            dc.SetPen(wx.Pen('#0AB1FF', width=2, style=wx.PENSTYLE_SOLID))
-        else:
-            dc.SetPen(wx.Pen('#CE8349', width=2, style=wx.PENSTYLE_SOLID))
-        dc.DrawSpline([(int(i*1.5), int(self.dataD[0][i])*2) for i in range(750)])
+        #if self.colorIdx == 0:
+        #    dc.SetPen(wx.Pen('#0AB1FF', width=2, style=wx.PENSTYLE_SOLID))
+        #else:
+        #    dc.SetPen(wx.Pen('#CE8349', width=2, style=wx.PENSTYLE_SOLID))
+        
 
 #--PanelChart--------------------------------------------------------------------
     def updateDisplay(self, updateFlag=None):

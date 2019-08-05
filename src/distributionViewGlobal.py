@@ -9,18 +9,21 @@
 # Copyright:   NUS-Singtel Cyber Security Research & Development Laboratory
 # License:     YC @ NUS
 #-----------------------------------------------------------------------------
-import os
+import os, sys
 
 dirpath = os.getcwd()
 print("distributionViewGlobal: Current working directory is : %s" %dirpath)
+
+
+WINP = sys.platform.startswith('win')
 
 # Application name and version. setting
 APP_NAME = 'NetFetcher Distribution Data Viewer'
 
 # module folder:
-MODE_F_PATH = "".join([dirpath, "/model/short_rc_exp10.csv"])
+MODE_F_PATH = "".join([dirpath, "\\model\\*.csv"]) if WINP else "".join([dirpath, "/model/*.csv"])
 # Data folder:
-DATA_F_PATH = "".join([dirpath, "/data/short_sc_exp10.csv"])
+DATA_F_PATH = "".join([dirpath, "\\data\\*.csv"]) if WINP else "".join([dirpath, "/data/*.csv"])
 
 iDataMgr = None          # data manager.
 iChartPanel0 = None      # History chart panel for module
