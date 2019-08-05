@@ -60,8 +60,6 @@ class distributionViewFrame(wx.Frame):
         self.dataMgr = distributionDataMgr(self)
         gv.iChartPanel0.colorIdx = 0
         gv.iChartPanel1.colorIdx = 1
-
-
         self.lastPeriodicTime = time.time() 
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.periodic)
@@ -176,18 +174,20 @@ class distributionDataMgr(object):
         gv.iChartPanel0.clearData()
         self.loadModelD()
 
+
     def setDataChIdx(self, idx):
         if self.DataChIdx == idx: return
         print(idx)
         self.DataChIdx = idx
-        
         self.loadDataD()
+
 
     def loadModelD(self):
         # Check Model folder
         gv.iChartPanel0.clearData()
         modelCSV = glob.glob(gv.MODE_F_PATH)
         print("Distribution Mgr: File in model folder to process: %s" %str(modelCSV))
+        gv.iChartPanel0.setLabel(modelCSV)
         for idx, fileName in enumerate(modelCSV):
             print(fileName)
             with open(fileName) as f:
@@ -200,9 +200,11 @@ class distributionDataMgr(object):
                     if i//1000 > SAMPLE_COUNT: continue # filter the too big data.
                     gv.iChartPanel0.dataD[idx][i//1000] += 1
 
+
     def loadDataD(self):
         gv.iChartPanel1.clearData()
         modelCSV = glob.glob(gv.DATA_F_PATH)
+        gv.iChartPanel1.setLabel(modelCSV)
         for idx, fileName in enumerate(modelCSV):
             print(fileName)
             with open(fileName) as f:

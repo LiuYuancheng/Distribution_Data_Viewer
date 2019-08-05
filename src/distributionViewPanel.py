@@ -15,6 +15,7 @@
 
 import wx
 import wx.grid
+import distributionViewGlobal as gv
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -34,7 +35,11 @@ class PanelChart(wx.Panel):
         self.dataD =[[0]*recNum for _ in range(dataSetNum)]
         self.times = [n for n in range(self.recNum//10)] # X-Axis.
         self.Bind(wx.EVT_PAINT, self.OnPaint)
-        self.maxCount = 0 
+        self.maxCount = 0
+        self.realDIsMode = True
+        self.labelInfo = ['Data1', 'Data2', 'Data3']
+    
+    
     def clearData(self):
         self.dataD =[[0]*self.recNum for _ in range(self.dataSetNum)]
 
@@ -56,7 +61,11 @@ class PanelChart(wx.Panel):
         font.SetPointSize(8)
         dc.SetFont(font)
         dc.DrawText('NetFetcher Data Distribution', 2, 245)
-        dc.DrawText('occurences[x10]', -35, 225)
+        if self.realDIsMode:
+            dc.DrawText('occurences', -35, 225)
+        else:
+            dc.DrawText('occurences[x10]', -35, 225)
+
         dc.DrawText('Delay[x1000 ns]', 700, -25)
 
         # Draw Axis and Grids:(Y-people count X-time)
@@ -67,34 +76,41 @@ class PanelChart(wx.Panel):
 
         self.maxCount= max([max(i) for i in self.dataD])
 
-
         for i in range(2, 22, 2):
             dc.DrawLine(2, i*10, w, i*10) # Y-Grid
             dc.DrawLine(2, i*10, -5, i*10)  # Y-Axis
-            dc.DrawText(str(self.maxCount//20*i), -25, i*10+5)  # format to ## int, such as 02
-
-
+            if self.realDIsMode:
+                dc.DrawText(str(self.maxCount//20*i), -25, i*10+5)  # format to ## int, such as 02
+            else:
+                dc.DrawText(str(i).zfill(2), -25, i*10+5)
 
         for i in range(len(self.times)): 
             dc.DrawLine(i*20, 2, i*20, 200) # X-Grid
             dc.DrawLine(i*20, 2, i*20, -5)  # X-Axis
             dc.DrawText(str(self.times[i]).zfill(2), i*20-5, -5)
         
+    def setLabel(self, labelList):
+        for i in range(len(labelList)):
+            self.labelInfo[i] = str(labelList[i].split('\\')[-1])[:-3]
+
 #--PanelChart--------------------------------------------------------------------
     def drawFG(self, dc):
         """ Draw the front ground data chart line."""
         # draw item (Label, color)
         #item = (('Data1', '#0AB1FF'), ('Data2', '#CE8349'), ('Data3', '#A5CDAA'))
-        item = (('Data1', 'RED'), ('Data2', '#A5CDAA'), ('Data3', 'BLUE'))
+        item = ((self.labelInfo[0], 'RED'), (self.labelInfo[1], '#A5CDAA'), (self.labelInfo[2], 'BLUE'))
+        lineW = 1 if self.realDIsMode else 2
 
         for idx in range(len(self.dataD)):
             (label, color) = item[idx]
             # Draw the line sample.
-            dc.SetPen(wx.Pen(color, width=1, style=wx.PENSTYLE_SOLID))
+            dc.SetPen(wx.Pen(color, width=lineW, style=wx.PENSTYLE_SOLID))
             dc.DrawText(label, idx*200+150, 220)
-            dc.DrawLine(100+idx*60, 212, 100+idx*60+8, 212)
-            
-            dc.DrawSpline([(int(i*2+idx*2), int(self.dataD[idx][i])*200//self.maxCount) for i in range(self.recNum)])
+            dc.DrawLine(120+idx*200, 212, 120+idx*200+20, 212)
+            if self.realDIsMode: 
+                dc.DrawSpline([(int(i*2+idx*2), int(self.dataD[idx][i])*200//self.maxCount) for i in range(self.recNum)])
+            else:
+                dc.DrawSpline([(int(i*2+idx*2), min(200,int(self.dataD[idx][i])*1)) for i in range(self.recNum)])
 
 
 #--PanelChart--------------------------------------------------------------------
@@ -126,9 +142,6 @@ class PanelChart(wx.Panel):
         if gv.iEmgStop: return
         timeStr = time.time()
         self.mapPanel.periodic(timeStr)
-
-
-
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -174,6 +187,7 @@ class PanelSetting(wx.Panel):
         sizer.Add(self.grid, flag=flagsR, border=2)
         sizer.AddSpacer(5)
         self.pauseBt = wx.Button(self, label='Construct Model', style=wx.BU_LEFT, size=(100, 23))
+        self.pauseBt.Bind(wx.EVT_BUTTON, self.onConstruct)
         sizer.Add(self.pauseBt, flag=wx.ALIGN_CENTER_HORIZONTAL, border=2)
         return sizer
 
@@ -214,4 +228,13 @@ class PanelSetting(wx.Panel):
         row_index = event.GetRow()
         self.grid.SelectRow(row_index)
         # covert 0->(0, 0) 1->(1, 0), 2->(0, 1), 3->(1, 1)
-        self.mapPanel.highLightPos = (row_index % 2, row_index//2) 
+        self.mapPanel.highLightPos = (row_index % 2, row_index//2)
+
+    def onConstruct(self, event):
+        with open(gv.CONFIG_FILE, 'a') as fh:
+            for i in range(5):
+                if self.grid.GetCellValue(i, 0) == '': break
+                data = [self.grid.GetCellValue(i, j) for j in range(6)]
+                line = 'Run: '+data[0]+':'+data[1]+' '+data[2]+':'+data[3]+' '+data[4]+' '+data[5]
+                fh.write(line+'\n')
+                fh.write('sleep1 \n')
