@@ -25,7 +25,7 @@ import distributionViewGlobal as gv
 import distributionViewPanel as dvp
 
 PERIODIC = 500
-SAMPLE_COUNT = 860
+SAMPLE_COUNT = 950
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class distributionViewFrame(wx.Frame):
@@ -124,12 +124,6 @@ class distributionViewFrame(wx.Frame):
 
     def periodic(self, event):
         """ Call back every periodic time."""
-        pass
-        # Set the title of the frame.
-        #self.SetTitle( ' '.join((gv.APP_NAME, datetime.now().strftime("[ %m/%d/%Y, %H:%M:%S ]"))))
-        #if gv.iEmgStop: return
-        #timeStr = time.time()
-        #self.mapPanel.periodic(timeStr)
         if time.time() - self.lastPeriodicTime > 3:
             self.dataMgr.loadModelD()
             gv.iChartPanel0.updateDisplay()
@@ -137,6 +131,20 @@ class distributionViewFrame(wx.Frame):
 
     def OnSetup(self, event):
         print("User clicked.")
+        if self.infoWindow is None and gv.iSetupPanel is None:
+            self.infoWindow = wx.MiniFrame(self, -1,
+                'NetFetcher Experiment Setup', pos=(300, 300), size=(620,250),
+                style=wx.DEFAULT_FRAME_STYLE)
+            gv.iSetupPanel = dvp.PanelSetting(self.infoWindow)
+            self.infoWindow.Bind(wx.EVT_CLOSE, self.infoWinClose)
+            self.infoWindow.Show()
+
+    def infoWinClose(self, event):
+        """ Close the pop-up detail information window"""
+        if self.infoWindow:
+            self.infoWindow.Destroy()
+            gv.iSetupPanel = None
+            self.infoWindow = None
 
     def onMChoice(self, event):
         self.dataMgr.setModelChIdx(self.chartCH0.GetSelection())

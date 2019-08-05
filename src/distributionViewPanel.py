@@ -34,7 +34,7 @@ class PanelChart(wx.Panel):
         self.dataD =[[0]*recNum for _ in range(dataSetNum)]
         self.times = [n for n in range(self.recNum//10)] # X-Axis.
         self.Bind(wx.EVT_PAINT, self.OnPaint)
-        
+        self.maxCount = 0 
     def clearData(self):
         self.dataD =[[0]*self.recNum for _ in range(self.dataSetNum)]
 
@@ -64,10 +64,17 @@ class PanelChart(wx.Panel):
         w, _ = self.appSize 
         dc.DrawLine(1, 1, w, 1)
         dc.DrawLine(1, 1, 1, w)
+
+        self.maxCount= max([max(i) for i in self.dataD])
+
+
         for i in range(2, 22, 2):
             dc.DrawLine(2, i*10, w, i*10) # Y-Grid
             dc.DrawLine(2, i*10, -5, i*10)  # Y-Axis
-            dc.DrawText(str(i).zfill(2), -25, i*10+5)  # format to ## int, such as 02
+            dc.DrawText(str(self.maxCount//20*i), -25, i*10+5)  # format to ## int, such as 02
+
+
+
         for i in range(len(self.times)): 
             dc.DrawLine(i*20, 2, i*20, 200) # X-Grid
             dc.DrawLine(i*20, 2, i*20, -5)  # X-Axis
@@ -77,23 +84,18 @@ class PanelChart(wx.Panel):
     def drawFG(self, dc):
         """ Draw the front ground data chart line."""
         # draw item (Label, color)
-        item = (('Data1', '#0AB1FF'), ('Data2', '#CE8349'), ('Data3', '#A5CDAA'))
+        #item = (('Data1', '#0AB1FF'), ('Data2', '#CE8349'), ('Data3', '#A5CDAA'))
+        item = (('Data1', 'RED'), ('Data2', '#A5CDAA'), ('Data3', 'BLUE'))
+
         for idx in range(len(self.dataD)):
             (label, color) = item[idx]
             # Draw the line sample.
-            dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
-            dc.DrawText(label, idx*60+115, 220)
+            dc.SetPen(wx.Pen(color, width=1, style=wx.PENSTYLE_SOLID))
+            dc.DrawText(label, idx*200+150, 220)
             dc.DrawLine(100+idx*60, 212, 100+idx*60+8, 212)
             
-            dc.DrawSpline([(int(i*2+idx*2), int(self.dataD[idx][i])*1) for i in range(self.recNum)])
+            dc.DrawSpline([(int(i*2+idx*2), int(self.dataD[idx][i])*200//self.maxCount) for i in range(self.recNum)])
 
-            # Create the point list and draw.
-        # Draw the distribution line: 
-        #if self.colorIdx == 0:
-        #    dc.SetPen(wx.Pen('#0AB1FF', width=2, style=wx.PENSTYLE_SOLID))
-        #else:
-        #    dc.SetPen(wx.Pen('#CE8349', width=2, style=wx.PENSTYLE_SOLID))
-        
 
 #--PanelChart--------------------------------------------------------------------
     def updateDisplay(self, updateFlag=None):
@@ -135,8 +137,8 @@ class PanelSetting(wx.Panel):
     """
     def __init__(self, parent):
         """ Init the panel."""
-        wx.Panel.__init__(self, parent, size=(350, 300))
-        self.SetBackgroundColour(wx.Colour(200, 210, 200))
+        wx.Panel.__init__(self, parent, size=(620, 250))
+        self.SetBackgroundColour(wx.Colour(200, 200, 210))
         self.SetSizer(self.buidUISizer())
 
 #--PanelMultInfo---------------------------------------------------------------
@@ -145,28 +147,34 @@ class PanelSetting(wx.Panel):
         sizer = wx.BoxSizer(wx.VERTICAL)
         flagsT, flagsR = wx.RIGHT, wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         sizer.AddSpacer(5)
-        sizer.Add(wx.StaticText(self, label="Fill the data information in the grid: "), flag=flagsR, border=2)
+        sizer.Add(wx.StaticText(self, label="Fill The Information In The Grid: "), flag=flagsR, border=2)
         sizer.AddSpacer(5)
-        sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(450, -1), style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(640, -1), style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         sizer.AddSpacer(5)
-        self.pauseBt = wx.Button(self, label='Process data', style=wx.BU_LEFT, size=(80, 23))
-        sizer.Add(self.pauseBt, flag=flagsR, border=2)
+
         sizer.AddSpacer(5)
         self.grid = wx.grid.Grid(self, -1)
-        self.grid.CreateGrid(25, 4)
+        self.grid.CreateGrid(5, 6)
         # Set the Grid size.
         self.grid.SetRowLabelSize(40)
-        self.grid.SetColSize(0, 100)
-        self.grid.SetColSize(1, 100)
-        self.grid.SetColSize(2, 100)
-        self.grid.SetColSize(3, 150)
+        self.grid.SetColSize(0, 80)
+        self.grid.SetColSize(1, 80)
+        self.grid.SetColSize(2, 80)
+        self.grid.SetColSize(3, 80)
+        self.grid.SetColSize(4, 80)
+        self.grid.SetColSize(5, 150)
         # Set the Grid's labels.
         self.grid.SetColLabelValue(0, 'IP address')
-        self.grid.SetColLabelValue(1, 'File ID ')
-        self.grid.SetColLabelValue(2, 'Block Num')
-        self.grid.SetColLabelValue(3, 'Output file')
+        self.grid.SetColLabelValue(1, 'Port NUm ')
+        self.grid.SetColLabelValue(2, 'File ID ')
+        self.grid.SetColLabelValue(3, 'Block Num')
+        self.grid.SetColLabelValue(4, 'Iterations ')
+        self.grid.SetColLabelValue(5, 'Output file')
         #self.grid.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.highLightMap)
         sizer.Add(self.grid, flag=flagsR, border=2)
+        sizer.AddSpacer(5)
+        self.pauseBt = wx.Button(self, label='Construct Model', style=wx.BU_LEFT, size=(100, 23))
+        sizer.Add(self.pauseBt, flag=wx.ALIGN_CENTER_HORIZONTAL, border=2)
         return sizer
 
 #--PanelMultInfo---------------------------------------------------------------

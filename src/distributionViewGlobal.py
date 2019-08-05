@@ -28,3 +28,4 @@ DATA_F_PATH = "".join([dirpath, "\\data\\*.csv"]) if WINP else "".join([dirpath,
 iDataMgr = None          # data manager.
 iChartPanel0 = None      # History chart panel for module
 iChartPanel1 = None      # History chart panel
+iSetupPanel = None
