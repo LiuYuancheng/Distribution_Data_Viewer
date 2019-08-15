@@ -14,15 +14,13 @@ import os, sys
 dirpath = os.getcwd()
 print("distributionViewGlobal: Current working directory is : %s" %dirpath)
 
-
 WINP = sys.platform.startswith('win')
 
 # Application name and version. setting
 APP_NAME = 'NetFetcher Distribution Data Viewer'
 
-ICON_PATH = "".join([dirpath, "\\img\\title.png"])
-
-
+# program title icon
+ICON_PATH = "".join([dirpath, "\\img\\title.png"]) if WINP else "".join([dirpath, "/img/title.png"])
 # module folder:
 MODE_F_PATH = "".join([dirpath, "\\model\\*.csv"]) if WINP else "".join([dirpath, "/model/*.csv"])
 # Data folder:
@@ -30,7 +28,9 @@ DATA_F_PATH = "".join([dirpath, "\\data\\*.csv"]) if WINP else "".join([dirpath,
 
 CONFIG_FILE = "scripted_exp.bat"
 
-iDataMgr = None          # data manager.
-iChartPanel0 = None      # History chart panel for module
-iChartPanel1 = None      # History chart panel
-iSetupPanel = None
+iDataMgr = None     # data manager.
+iChartPanel0 = None # History chart panel for module
+iChartPanel1 = None # History chart panel
+iSetupPanel = None  
+iModelType = 4      # Model Type currently displayed
+iDataType = 4       # Data Type currently displayed
