@@ -1,14 +1,14 @@
 #!/usr/bin/python
 #-----------------------------------------------------------------------------
-# Name:        distributionView.py
+# Name:        distributionViewer.py
 #
-# Purpose:     This module is used to read the data from serveral CSV file and 
-#              draw the distribution diagram.
+# Purpose:     This module is used to read the data from serveral CSV files in 
+#              data/model folder and draw the distribution diagram.
 #             
 # Author:      Yuancheng Liu
 #
 # Created:     2019/08/02
-# Copyright:   NUS-Singtel Cyber Security Research & Development Laboratory
+# Copyright:   NUS Singtel Cyber Security Research & Development Laboratory
 # License:     YC @ NUS
 #-----------------------------------------------------------------------------
 
@@ -17,15 +17,14 @@ import csv
 import time
 import glob
 import wx # use wx to build the UI.
-# Auto adjust App size
 import random
-
-
+# Import the local modules
 import distributionViewGlobal as gv
 import distributionViewPanel as dvp
 
-PERIODIC = 500
-SAMPLE_COUNT = 950
+PERIODIC = 500      # update in every 500ms
+SAMPLE_COUNT = 950  # 
+
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class distributionViewFrame(wx.Frame):
@@ -33,10 +32,13 @@ class distributionViewFrame(wx.Frame):
     def __init__(self, parent, id, title):
         """ Init the UI and all parameters """
         wx.Frame.__init__(self, parent, id, title, size=(1600, 720))
-        #self.SetIcon(wx.Icon(gv.ICON_PATH))
+        self.SetBackgroundColour(wx.Colour(200, 210, 200))
+        icon = wx.Icon()
+        icon.CopyFromBitmap(wx.Bitmap(gv.ICON_PATH, wx.BITMAP_TYPE_ANY))
+        self.SetIcon(icon)
         self.sampleCount = SAMPLE_COUNT
-        self.infoWindow= None
-        # Creat the menu bar.
+        self.infoWindow = None   # popup window to do the setting.
+        # Creat the function menu bar.
         menubar = wx.MenuBar()
         fileMenu = wx.Menu()
         fileItem = fileMenu.Append(wx.ID_NEW, 'Setup', 'Setup application')
@@ -44,82 +46,83 @@ class distributionViewFrame(wx.Frame):
         menubar.Append(wx.Menu(), '&DataDisplay')
         menubar.Append(wx.Menu(), '&Help')
         self.SetMenuBar(menubar)
-        self.Bind(wx.EVT_MENU, self.OnSetup, fileItem)
-
+        self.Bind(wx.EVT_MENU, self.onSetup, fileItem)
+        # data type.
         self.displayChoice = \
-            ('Type 0: Timestamping Delay', 
-            'Type 1: Preprocessing Delay',
-            'Type 2: Disk Seek Delay',
-            'Type 3: Disk Read Delay', 
-            'Type 4: Client Observed Delay',
-            'Type 5: Input/Output Delay (Type 2 + Type 3)')
-
-        self.SetBackgroundColour(wx.Colour(200, 210, 200))
+            ('Type 0: Timestamping Delay',
+             'Type 1: Preprocessing Delay',
+             'Type 2: Disk Seek Delay',
+             'Type 3: Disk Read Delay',
+             'Type 4: Client Observed Delay',
+             'Type 5: Input/Output Delay (Type 2 + Type 3)')
+        # Init the UI
         self.SetSizer(self.buildUISizer())
-        # The data manager.
-        self.dataMgr = distributionDataMgr(self)
         gv.iChartPanel0.colorIdx = 0
         gv.iChartPanel1.colorIdx = 1
-        self.lastPeriodicTime = time.time() 
+        # The data manager.
+        self.dataMgr = distributionDataMgr(self)
+        # Init the periodic timer.
+        self.lastPeriodicTime = time.time()
         self.timer = wx.Timer(self)
         self.Bind(wx.EVT_TIMER, self.periodic)
         self.timer.Start(PERIODIC)  # every 500 ms
-
+        # Show the frame.
         self.SetDoubleBuffered(True)
-
-        #self.Bind(wx.EVT_CLOSE, self.OnClose)
         self.Refresh(False)
 
 #-----------------------------------------------------------------------------
     def buildUISizer(self):
         """ Init the frame user interface and return the sizer."""
-
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         width, _ = wx.GetDisplaySize()
-        print(width)
         appSize = (width, 700) if width == 1920 else (1600, 700)
-
         sizer = wx.BoxSizer(wx.VERTICAL)
-        # Row index 0: title and data selection
+        # Row index 0: model title, data type selection, simple rate selection.
         hbox0 = wx.BoxSizer(wx.HORIZONTAL)
-        hbox0.Add(wx.Button(self, label='Data Source: [Model]', size=(140, 23)), flag=flagsR, border=2)
+        hbox0.Add(wx.Button(self, label='Data Source: [Model]', size=(
+            140, 23)), flag=flagsR, border=2)
         hbox0.AddSpacer(10)
-        self.chartCH0 = wx.ComboBox(self, -1, choices=self.displayChoice, style=wx.CB_READONLY)
+        self.chartCH0 = wx.ComboBox(
+            self, -1, choices=self.displayChoice, style=wx.CB_READONLY)
         self.chartCH0.Bind(wx.EVT_COMBOBOX, self.onMChoice)
-        self.chartCH0.SetSelection(4)
+        self.chartCH0.SetSelection(self.dataMgr.ModeChIdx)
         hbox0.Add(self.chartCH0, flag=flagsR, border=2)
         hbox0.AddSpacer(10)
-        self.SampleRCH0 = wx.ComboBox(self, -1, choices= ['Sample Rate: '+str((i+1)*10) for i in range(10)], style=wx.CB_READONLY)
-        self.SampleRCH0.SetSelection(4)
+        self.SampleRCH0 = wx.ComboBox(
+            self, -1, choices=['Sample Rate: '+str((i+1)*10) for i in range(10)], style=wx.CB_READONLY)
+        self.SampleRCH0.SetSelection(1)
         hbox0.Add(self.SampleRCH0, flag=flagsR, border=2)
         sizer.Add(hbox0, flag=flagsR, border=2)
-        # Row index 1: the display channel.
+        # Row index 1: display panel for the model.
         gv.iChartPanel0 = linechart1 = dvp.PanelChart(
             self, 3, appSize=appSize, recNum=self.sampleCount)
         sizer.Add(linechart1, flag=flagsR, border=2)
         sizer.AddSpacer(5)
         sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
-                                  style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+                                style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         sizer.AddSpacer(5)
-        # Row index 2: 
+        # Row index 2: model title, data type selection.
         hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        hbox1.Add(wx.Button(self, label='Data Source: [Data]', size=(140, 23)), flag=flagsR, border=2)
+        hbox1.Add(wx.Button(self, label='Data Source: [Data]', size=(
+            140, 23)), flag=flagsR, border=2)
         hbox1.AddSpacer(10)
-        self.chartCH1 = wx.ComboBox(self, -1, choices=self.displayChoice, style=wx.CB_READONLY)
+        self.chartCH1 = wx.ComboBox(
+            self, -1, choices=self.displayChoice, style=wx.CB_READONLY)
         self.chartCH1.Bind(wx.EVT_COMBOBOX, self.onDChoice)
-        self.chartCH1.SetSelection(4)
+        self.chartCH1.SetSelection(self.dataMgr.DataChIdx)
         hbox1.Add(self.chartCH1, flag=flagsR, border=2)
         self.pauseBt = wx.Button(
             self, label='Reload Data', style=wx.BU_LEFT, size=(80, 23))
         hbox1.AddSpacer(10)
         hbox1.Add(self.pauseBt, flag=flagsR, border=2)
         sizer.Add(hbox1, flag=flagsR, border=2)
-        # Row index 3:
+        # Row index 3: display panel for the model.
         gv.iChartPanel1 = linechart2 = dvp.PanelChart(
-            self, 1,appSize=appSize, recNum=self.sampleCount)
-        sizer.Add(linechart2, flag=flagsR, border=2)        
+            self, 1, appSize=appSize, recNum=self.sampleCount)
+        sizer.Add(linechart2, flag=flagsR, border=2)
         return sizer
 
+#-----------------------------------------------------------------------------
     def periodic(self, event):
         """ Call back every periodic time."""
         if time.time() - self.lastPeriodicTime > 3:
@@ -127,7 +130,7 @@ class distributionViewFrame(wx.Frame):
             gv.iChartPanel0.updateDisplay()
             self.lastPeriodicTime = time.time()
 
-    def OnSetup(self, event):
+    def onSetup(self, event):
         print("User clicked.")
         if self.infoWindow is None and gv.iSetupPanel is None:
             self.infoWindow = wx.MiniFrame(self, -1,

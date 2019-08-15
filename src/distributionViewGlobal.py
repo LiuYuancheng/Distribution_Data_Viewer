@@ -20,6 +20,9 @@ WINP = sys.platform.startswith('win')
 # Application name and version. setting
 APP_NAME = 'NetFetcher Distribution Data Viewer'
 
+ICON_PATH = "".join([dirpath, "\\img\\title.png"])
+
+
 # module folder:
 MODE_F_PATH = "".join([dirpath, "\\model\\*.csv"]) if WINP else "".join([dirpath, "/model/*.csv"])
 # Data folder:
