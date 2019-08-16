@@ -86,9 +86,16 @@ class distributionViewFrame(wx.Frame):
         self.chartCH0.SetSelection(gv.iModelType)
         hbox0.Add(self.chartCH0, flag=flagsR, border=2)
         hbox0.AddSpacer(10)
+        self.disModeMCB =  wx.ComboBox(
+            self, -1, choices=['Dynamic display mode', 'Fixed display mode'], style=wx.CB_READONLY)
+        self.disModeMCB .SetSelection(1)
+        self.disModeMCB.Bind(wx.EVT_COMBOBOX, self.onDisModeSelection)
+        hbox0.Add(self.disModeMCB, flag=flagsR, border=2)
+        hbox0.AddSpacer(10)
         self.SampleRCH0 = wx.ComboBox(
             self, -1, choices=['Sample Rate: '+str((i+1)*10) for i in range(10)], style=wx.CB_READONLY)
-        self.SampleRCH0.SetSelection(1)
+        self.SampleRCH0.Bind(wx.EVT_COMBOBOX, self.onChangeSR)
+        self.SampleRCH0.SetSelection(0)
         hbox0.Add(self.SampleRCH0, flag=flagsR, border=2)
         sizer.Add(hbox0, flag=flagsR, border=2)
         # Row index 1: display panel for the model.
@@ -109,9 +116,16 @@ class distributionViewFrame(wx.Frame):
         self.chartCH1.Bind(wx.EVT_COMBOBOX, self.onDChoice)
         self.chartCH1.SetSelection(gv.iDataType)
         hbox1.Add(self.chartCH1, flag=flagsR, border=2)
+        hbox1.AddSpacer(10)
+        self.disModeDCB =  wx.ComboBox(
+            self, -1, choices=['Dynamic display mode', 'Fixed display mode'], style=wx.CB_READONLY)
+        self.disModeDCB .SetSelection(0)
+        self.disModeDCB.Bind(wx.EVT_COMBOBOX, self.onDisModeSelection)
+        hbox1.Add(self.disModeDCB, flag=flagsR, border=2)
+        hbox1.AddSpacer(10)
         self.pauseBt = wx.Button(
             self, label='Reload Data', style=wx.BU_LEFT, size=(80, 23))
-        hbox1.AddSpacer(10)
+        self.pauseBt.Bind(wx.EVT_BUTTON, self.reloadData)
         hbox1.Add(self.pauseBt, flag=flagsR, border=2)
         sizer.Add(hbox1, flag=flagsR, border=2)
         # Row index 3: display panel for the model.
@@ -129,6 +143,13 @@ class distributionViewFrame(wx.Frame):
             self.infoWindow = None
 
 #-----------------------------------------------------------------------------
+    def reloadData(self, event):
+        """ reload data from the data folder and update the display"""
+        print("Reload data from the data folder. ")
+        self.dataMgr.loadDataD()
+        gv.iChartPanel1.updateDisplay()
+
+#-----------------------------------------------------------------------------
     def periodic(self, event):
         """ Call back every periodic time."""
         if time.time() - self.lastPeriodicTime > 3:
@@ -137,9 +158,20 @@ class distributionViewFrame(wx.Frame):
             self.lastPeriodicTime = time.time()
 
 #-----------------------------------------------------------------------------
+    def onChangeSR(self, event):
+        self.dataMgr.sampleRate= (int(self.SampleRCH0.GetSelection())+1)*10
+
+#-----------------------------------------------------------------------------
     def onDChoice(self, event):
         """ Change the data display data type."""
         self.dataMgr.setDataChIdx(self.chartCH1.GetSelection())
+        gv.iChartPanel1.updateDisplay()
+
+#-----------------------------------------------------------------------------
+    def onDisModeSelection(self, event):
+        gv.iChartPanel0.readDisMode = True if self.disModeMCB.GetSelection() == 0 else False
+        gv.iChartPanel1.readDisMode = True if self.disModeDCB.GetSelection() == 0 else False
+        gv.iChartPanel0.updateDisplay()
         gv.iChartPanel1.updateDisplay()
 
 #-----------------------------------------------------------------------------
