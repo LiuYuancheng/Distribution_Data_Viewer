@@ -21,6 +21,7 @@ import random
 # Import the local modules
 import distributionViewGlobal as gv
 import distributionViewPanel as dvp
+import distributionVieweBCRun as btcRun
 
 PERIODIC = 500      # update in every 500ms
 SAMPLE_COUNT = 950  # 
@@ -38,15 +39,18 @@ class distributionViewFrame(wx.Frame):
         self.SetIcon(icon)
         self.sampleCount = SAMPLE_COUNT
         self.infoWindow = None   # popup window to do the setting.
+        self.loadLock = False
         # Creat the function menu bar.
         menubar = wx.MenuBar()
         fileMenu = wx.Menu()
         fileItem = fileMenu.Append(wx.ID_NEW, 'Setup', 'Setup application')
+        startItem = fileMenu.Append(wx.ID_NEW, 'Start', 'start application')
         menubar.Append(fileMenu, '&Experiment')
         menubar.Append(wx.Menu(), '&DataDisplay')
         menubar.Append(wx.Menu(), '&Help')
         self.SetMenuBar(menubar)
-        self.Bind(wx.EVT_MENU, self.onSetup, fileItem)
+        self.Bind(wx.EVT_MENU, self.onSetupExp, fileItem)
+        self.Bind(wx.EVT_MENU, self.onStartExp, startItem)
         # data type.
         self.displayChoice = \
             ('Type 0: Timestamping Delay',
@@ -67,6 +71,7 @@ class distributionViewFrame(wx.Frame):
         # Show the frame.
         self.SetDoubleBuffered(True)
         self.Refresh(False)
+        self.expThread = btcRun.commThread(1, "Thread-1", 1)
 
 #-----------------------------------------------------------------------------
     def buildUISizer(self):
@@ -141,6 +146,7 @@ class distributionViewFrame(wx.Frame):
             self.infoWindow.Destroy()
             gv.iSetupPanel = None
             self.infoWindow = None
+            self.loadLock = False    # Lock all the data load process
 
 #-----------------------------------------------------------------------------
     def reloadData(self, event):
@@ -153,7 +159,8 @@ class distributionViewFrame(wx.Frame):
     def periodic(self, event):
         """ Call back every periodic time."""
         if time.time() - self.lastPeriodicTime > 3:
-            self.dataMgr.loadModelD()
+            if not self.loadLock:
+                self.dataMgr.loadModelD()
             gv.iChartPanel0.updateDisplay()
             self.lastPeriodicTime = time.time()
 
@@ -180,10 +187,16 @@ class distributionViewFrame(wx.Frame):
         self.dataMgr.setModelChIdx(self.chartCH0.GetSelection())
         gv.iChartPanel0.updateDisplay()
 
+    def onStartExp(self, event):
+        """ Run the experiment once."""
+        print("Start the experiment.")        
+        self.expThread.experimentStart()
+
 #-----------------------------------------------------------------------------
-    def onSetup(self, event):
+    def onSetupExp(self, event):
         """ Pop-up the experiment setup window. """
         if self.infoWindow is None and gv.iSetupPanel is None:
+            self.loadLock = True    # Lock all the data load process
             self.infoWindow = wx.MiniFrame(self, -1,
                                 'NetFetcher Experiment Setup', 
                                 pos=(300, 300), size=(620, 250),
