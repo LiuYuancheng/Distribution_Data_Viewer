@@ -26,9 +26,9 @@ MODE_F_PATH = "".join([dirpath, "\\model\\*.csv"]) if WINP else "".join([dirpath
 # Data folder:
 DATA_F_PATH = "".join([dirpath, "\\data\\*.csv"]) if WINP else "".join([dirpath, "/data/*.csv"])
 
-CONFIG_FILE = "scripted_exp.bat"
+CONFIG_FILE = ("model_scripted_exp.bat", "check_scripted_exp.bat")
 
-
+iMainFame = None
 iDataMgr = None     # data manager.
 iChartPanel0 = None # History chart panel for module
 iChartPanel1 = None # History chart panel

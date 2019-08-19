@@ -106,7 +106,7 @@ class PanelChart(wx.Panel):
             if n <= val:
                 preVal = 0 if idx == 0 else self.logScale[idx-1]
                 return int((n-preVal)/float((val-preVal))*20+20*(idx))
-        return 400 # return the max 
+        return 210 # return the max 
 
 #----------------------------------------------------------------------------- 
     def onPaint(self, event):
@@ -153,9 +153,10 @@ class PanelChart(wx.Panel):
 #-----------------------------------------------------------------------------
 class PanelSetting(wx.Panel):
     """ Experiment setup panel."""
-    def __init__(self, parent):
+    def __init__(self, parent, mode):
         """ Init the panel."""
         wx.Panel.__init__(self, parent, size=(620, 250))
+        self.mode = mode
         self.SetBackgroundColour(wx.Colour(200, 200, 210))
         self.SetSizer(self.buidUISizer())
 
@@ -172,7 +173,8 @@ class PanelSetting(wx.Panel):
                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         sizer.AddSpacer(5)
         self.grid = wx.grid.Grid(self, -1)
-        self.grid.CreateGrid(5, 6)
+        collumNum = 5 if self.mode == 0 else 1
+        self.grid.CreateGrid(collumNum, 6)
         # Set the Grid size.
         self.grid.SetRowLabelSize(40)
         self.grid.SetColSize(0, 80)
@@ -191,20 +193,39 @@ class PanelSetting(wx.Panel):
         #self.grid.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.highLightMap)
         sizer.Add(self.grid, flag=flagsR, border=2)
         sizer.AddSpacer(5)
+
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+
         self.pauseBt = wx.Button(
-            self, label='Construct Model', style=wx.BU_LEFT, size=(100, 23))
+            self, label='Calibration', style=wx.BU_LEFT, size=(100, 23))
         self.pauseBt.Bind(wx.EVT_BUTTON, self.onConstruct)
-        sizer.Add(self.pauseBt, flag=wx.ALIGN_CENTER_HORIZONTAL, border=2)
+        hbox.Add(self.pauseBt, flag=flagsR, border=2)
+        hbox.AddSpacer(10)
+        hbox.Add(wx.StaticText(self, label="--->"), flag=flagsR, border=2)
+        hbox.AddSpacer(10)
+        self.fetchBt = wx.Button(
+            self, label='BatchRun', style=wx.BU_LEFT, size=(100, 23))
+        self.fetchBt.Bind(wx.EVT_BUTTON, self.onStartExp)
+        hbox.Add(self.fetchBt, flag=flagsR, border=2)
+        self.fetchBt.Enable(False)
+        sizer.Add(hbox, flag=flagsR, border=2)
+        
         return sizer
+
+
+    def onStartExp(self, event):
+        gv.iMainFame.onStartExp(self.mode)
 
 #-----------------------------------------------------------------------------
     def onConstruct(self, event):
         """ Create the experiment setup file based on data in the grid. """
-        with open(gv.CONFIG_FILE, 'w') as fh:
-            for i in range(5):
+        with open(gv.CONFIG_FILE[self.mode], 'w') as fh:
+            collumNum = 5 if self.mode == 0 else 1
+            for i in range(collumNum):
                 if self.grid.GetCellValue(i, 0) == '':continue
                 data = [self.grid.GetCellValue(i, j) for j in range(6)]
                 line = 'Run: '+data[0]+':'+data[1]+' ' + \
                     data[2]+':'+data[3]+' '+data[4]+' '+data[5]
                 fh.write(line+'\n')
                 fh.write('sleep1\n\n')
+        self.fetchBt.Enable(True)

@@ -39,20 +39,16 @@ class distributionViewFrame(wx.Frame):
         icon = wx.Icon()
         icon.CopyFromBitmap(wx.Bitmap(gv.ICON_PATH, wx.BITMAP_TYPE_ANY))
         self.SetIcon(icon)
+        gv.iMainFame = self
         self.sampleCount = SAMPLE_COUNT
         self.infoWindow = None   # popup window to do the setting.
         self.loadLock = False
         # Creat the function menu bar.
         menubar = wx.MenuBar()
-        fileMenu = wx.Menu()
-        fileItem = fileMenu.Append(wx.ID_NEW, 'Setup', 'Setup application')
-        startItem = fileMenu.Append(wx.ID_NEW, 'Start', 'start application')
-        menubar.Append(fileMenu, '&Experiment')
-        menubar.Append(wx.Menu(), '&DataDisplay')
         menubar.Append(wx.Menu(), '&Help')
         self.SetMenuBar(menubar)
-        self.Bind(wx.EVT_MENU, self.onSetupExp, fileItem)
-        self.Bind(wx.EVT_MENU, self.onStartExp, startItem)
+        
+        #self.Bind(wx.EVT_MENU, self.onStartExp, startItem)
         # data type.
         self.displayChoice = \
             ('Type 0: Timestamping Delay',
@@ -87,6 +83,11 @@ class distributionViewFrame(wx.Frame):
         hbox0.Add(wx.Button(self, label='Data Source: [Model]', size=(
             140, 23)), flag=flagsR, border=2)
         hbox0.AddSpacer(10)
+        self.expMSBt = wx.Button(self, label='Setup', size=(60, 23))
+        hbox0.Add(self.expMSBt, flag=flagsR, border=2)
+        self.expMSBt.Bind(wx.EVT_BUTTON, self.onSetupModelExp)
+        hbox0.AddSpacer(10)
+
         self.chartCH0 = wx.ComboBox(
             self, -1, choices=self.displayChoice, style=wx.CB_READONLY)
         self.chartCH0.Bind(wx.EVT_COMBOBOX, self.onMChoice)
@@ -95,7 +96,7 @@ class distributionViewFrame(wx.Frame):
         hbox0.AddSpacer(10)
         self.disModeMCB =  wx.ComboBox(
             self, -1, choices=['Logarithmic scale', 'Linear scale: Dynamic', 'Linear scale: Fixed'], style=wx.CB_READONLY)
-        self.disModeMCB .SetSelection(1)
+        self.disModeMCB .SetSelection(0)
         self.disModeMCB.Bind(wx.EVT_COMBOBOX, self.onDisModeSelection)
         hbox0.Add(self.disModeMCB, flag=flagsR, border=2)
         sizer.Add(hbox0, flag=flagsR, border=2)
@@ -112,6 +113,12 @@ class distributionViewFrame(wx.Frame):
         hbox1.Add(wx.Button(self, label='Data Source: [Data]', size=(
             140, 23)), flag=flagsR, border=2)
         hbox1.AddSpacer(10)
+        
+        self.expCSBt = wx.Button(self, label='Setup', size=(60, 23))
+        hbox1.Add(self.expCSBt, flag=flagsR, border=2)
+        self.expCSBt.Bind(wx.EVT_BUTTON, self.onSetupCheckExp)
+        hbox1.AddSpacer(10)
+
         self.chartCH1 = wx.ComboBox(
             self, -1, choices=self.displayChoice, style=wx.CB_READONLY)
         self.chartCH1.Bind(wx.EVT_COMBOBOX, self.onDChoice)
@@ -144,17 +151,20 @@ class distributionViewFrame(wx.Frame):
         self.updateRateCB = wx.ComboBox(
             self, -1, choices=['Update Rate: %s s' %str(i+1) for i in range(5)], style=wx.CB_READONLY)
         self.updateRateCB.SetSelection(1)
+        self.updateRateCB.Bind(wx.EVT_COMBOBOX, self.onChangeUR)
         hbox2.Add(self.updateRateCB, flag=flagsR, border=2)
         hbox2.AddSpacer(10)
         self.lineStyleCB = wx.ComboBox(
             self, -1, choices=['Line Style: thin', 'Line Style: thick'], style=wx.CB_READONLY)
         self.lineStyleCB.SetSelection(0)
+        self.lineStyleCB.Bind(wx.EVT_COMBOBOX, self.onChangeLS)
+
         hbox2.Add(self.lineStyleCB, flag=flagsR, border=2)
         hbox2.AddSpacer(10)
         self.SampleRCH0 = wx.ComboBox(
             self, -1, choices=['Sample Rate: '+str((i+1)*10) for i in range(10)], style=wx.CB_READONLY)
         self.SampleRCH0.Bind(wx.EVT_COMBOBOX, self.onChangeSR)
-        self.SampleRCH0.SetSelection(3)
+        self.SampleRCH0.SetSelection(2)
         hbox2.Add(self.SampleRCH0, flag=flagsR, border=2)
         sizer.Add(hbox2, flag=flagsR, border=2)
         return sizer
@@ -194,6 +204,14 @@ class distributionViewFrame(wx.Frame):
         #gv.iChartPanel0.sampleRate = (int(self.SampleRCH0.GetSelection())+1)*10
         #gv.iChartPanel1.sampleRate = (int(self.SampleRCH0.GetSelection())+1)*10
 
+    def onChangeUR(self, event):
+        gv.iUpdateRate = self.updateRateCB.GetSelection()+1
+
+    def onChangeLS(self, event):
+        gv.iLineStyle = self.lineStyleCB.GetSelection()+1
+        gv.iChartPanel0.updateDisplay()
+        gv.iChartPanel1.updateDisplay()
+
 #-----------------------------------------------------------------------------
     def onDChoice(self, event):
         """ Change the data display data type."""
@@ -213,21 +231,33 @@ class distributionViewFrame(wx.Frame):
         self.dataMgr.setModelChIdx(self.chartCH0.GetSelection())
         gv.iChartPanel0.updateDisplay()
 
-    def onStartExp(self, event):
+    def onStartExp(self, mode):
         """ Run the experiment once."""
         print("Start the experiment.")        
         self.expThread.experimentStart()
 
 #-----------------------------------------------------------------------------
-    def onSetupExp(self, event):
+    def onSetupModelExp(self, event):
         """ Pop-up the experiment setup window. """
         if self.infoWindow is None and gv.iSetupPanel is None:
             self.loadLock = True    # Lock all the data load process
             self.infoWindow = wx.MiniFrame(self, -1,
-                                'NetFetcher Experiment Setup', 
+                                'NetFetcher [Model] Experiment Setup', 
                                 pos=(300, 300), size=(620, 250),
                                 style=wx.DEFAULT_FRAME_STYLE)
-            gv.iSetupPanel = dvp.PanelSetting(self.infoWindow)
+            gv.iSetupPanel = dvp.PanelSetting(self.infoWindow, 0)
+            self.infoWindow.Bind(wx.EVT_CLOSE, self.infoWinClose)
+            self.infoWindow.Show()
+
+    def onSetupCheckExp(self, event):
+        """ Pop-up the experiment setup window. """
+        if self.infoWindow is None and gv.iSetupPanel is None:
+            self.loadLock = True    # Lock all the data load process
+            self.infoWindow = wx.MiniFrame(self, -1,
+                                'NetFetcher [Check] Experiment Setup', 
+                                pos=(300, 300), size=(620, 160),
+                                style=wx.DEFAULT_FRAME_STYLE)
+            gv.iSetupPanel = dvp.PanelSetting(self.infoWindow, 1)
             self.infoWindow.Bind(wx.EVT_CLOSE, self.infoWinClose)
             self.infoWindow.Show()
 
