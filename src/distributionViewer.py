@@ -25,6 +25,8 @@ import distributionVieweBCRun as btcRun
 
 PERIODIC = 500      # update in every 500ms
 SAMPLE_COUNT = 950  # 
+DEF_SIZE = (1920, 720) 
+
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -32,7 +34,7 @@ class distributionViewFrame(wx.Frame):
     """ Main frame of the distribution viewer."""
     def __init__(self, parent, id, title):
         """ Init the UI and all parameters """
-        wx.Frame.__init__(self, parent, id, title, size=(1600, 720))
+        wx.Frame.__init__(self, parent, id, title, size=DEF_SIZE)
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         icon = wx.Icon()
         icon.CopyFromBitmap(wx.Bitmap(gv.ICON_PATH, wx.BITMAP_TYPE_ANY))
@@ -100,7 +102,7 @@ class distributionViewFrame(wx.Frame):
         self.SampleRCH0 = wx.ComboBox(
             self, -1, choices=['Sample Rate: '+str((i+1)*10) for i in range(10)], style=wx.CB_READONLY)
         self.SampleRCH0.Bind(wx.EVT_COMBOBOX, self.onChangeSR)
-        self.SampleRCH0.SetSelection(0)
+        self.SampleRCH0.SetSelection(3)
         hbox0.Add(self.SampleRCH0, flag=flagsR, border=2)
         sizer.Add(hbox0, flag=flagsR, border=2)
         # Row index 1: display panel for the model.
@@ -158,15 +160,17 @@ class distributionViewFrame(wx.Frame):
 #-----------------------------------------------------------------------------
     def periodic(self, event):
         """ Call back every periodic time."""
-        if time.time() - self.lastPeriodicTime > 3:
+        if time.time() - self.lastPeriodicTime > 1:
             if not self.loadLock:
-                self.dataMgr.loadModelD()
+                self.dataMgr.setModelD()
             gv.iChartPanel0.updateDisplay()
             self.lastPeriodicTime = time.time()
 
 #-----------------------------------------------------------------------------
     def onChangeSR(self, event):
         self.dataMgr.sampleRate= (int(self.SampleRCH0.GetSelection())+1)*10
+        #gv.iChartPanel0.sampleRate = (int(self.SampleRCH0.GetSelection())+1)*10
+        #gv.iChartPanel1.sampleRate = (int(self.SampleRCH0.GetSelection())+1)*10
 
 #-----------------------------------------------------------------------------
     def onDChoice(self, event):
@@ -210,47 +214,70 @@ class distributionViewFrame(wx.Frame):
 class distributionDataMgr(object):
     """ Manager module to process the csv files."""
     def __init__(self, parent):
-        self.sampleRate = 10   # % of samples we will load from the [model] file.
+        self.sampleRate = 30   # % of samples we will load from the [model] file.
         self.ModeChIdx = gv.iModelType
         self.DataChIdx = gv.iDataType
+        print("DistributionDataMgr: Loading data.")
+        self.modelD = []    # mode folder data set. 
+        self.dataD  = []    # data folder data set.
         self.loadModelD()   # load data from model folder.
         self.loadDataD()    # load data from data folder.
+        self.setModelD()
+        self.setDataD()
 
 #-----------------------------------------------------------------------------
     def loadModelD(self):
         """ Check all the csv file from the model folder and load the data."""
         # clear the old display.
-        gv.iChartPanel0.clearData()
+        self.modelD = []
         modelCSV = glob.glob(gv.MODE_F_PATH)
         #print("Distribution Mgr:    File in model folder to process: %s" %str(modelCSV))
         gv.iChartPanel0.setLabel(modelCSV)
-        for idx, fileName in enumerate(modelCSV):
+        for fileName in modelCSV:
             #print(fileName)
+            dataSet = []
             with open(fileName) as f:
                 f_csv = csv.reader(f)
                 _ = next(f_csv)  # skip the csv header.
                 for row in f_csv:
-                    # random sample the data based on the sample rate.
-                    if random.randint(0, 1000) > self.sampleRate*10: continue
                     i = int(row[self.ModeChIdx+1]) if self.ModeChIdx < 5 else (int(row[3])+int(row[4]))
-                    if i//1000 > SAMPLE_COUNT: continue  # filter the too big data.
-                    gv.iChartPanel0.dataD[idx][i//1000] += 1
+                    dataSet.append(i)
+            self.modelD.append(dataSet)
+
+#-----------------------------------------------------------------------------
+    def setModelD(self):
+        """ Set the model data."""
+        gv.iChartPanel0.clearData()
+        for idx, dataSet in enumerate(self.modelD):
+            for num in random.sample(dataSet, len(dataSet)*self.sampleRate//100):
+                if num//1000 > SAMPLE_COUNT: continue  # filter the too big data.
+                gv.iChartPanel0.dataD[idx][num//1000] += 1
+
+    def setDataD(self):
+        """ Set the model data."""
+        gv.iChartPanel1.clearData()
+        for idx, dataSet in enumerate(self.dataD):
+            for num in random.sample(dataSet, len(dataSet)*self.sampleRate//100):
+                if num//1000 > SAMPLE_COUNT: continue  # filter the too big data.
+                gv.iChartPanel1.dataD[idx][num//1000] += 1
 
 #-----------------------------------------------------------------------------
     def loadDataD(self):
         """ Check all the csv file from the data folder and load the data."""
-        gv.iChartPanel1.clearData()
+        self.dataD = [] 
         modelCSV = glob.glob(gv.DATA_F_PATH)
         gv.iChartPanel1.setLabel(modelCSV)
-        for idx, fileName in enumerate(modelCSV):
+        for fileName in modelCSV:
             #print(fileName)
+            dataSet = []
             with open(fileName) as f:
                 f_csv = csv.reader(f)
                 _ = next(f_csv) # skip the csv header.
                 for row in f_csv:
                     i = int(row[self.DataChIdx+1]) if self.DataChIdx < 5 else (int(row[3])+int(row[4]))
-                    if i//1000 > SAMPLE_COUNT: continue # filter the too big data.
-                    gv.iChartPanel1.dataD[idx][i//1000] += 1
+                    dataSet.append(i)
+            self.dataD.append(dataSet)
+
 
 #-----------------------------------------------------------------------------
     def setDataChIdx(self, idx):
@@ -259,14 +286,15 @@ class distributionDataMgr(object):
         print(idx)
         self.DataChIdx = idx
         self.loadDataD()
+        self.setDataD()
 
 #-----------------------------------------------------------------------------
     def setModelChIdx(self, idx):
         """ set the [model] type we are going to load and display."""
         if self.ModeChIdx == idx: return
         self.ModeChIdx = idx
-        gv.iChartPanel0.clearData()
         self.loadModelD()
+        self.setModelD()
 
 #-----------------------------------------------------------------------------
     def periodic(self, now):

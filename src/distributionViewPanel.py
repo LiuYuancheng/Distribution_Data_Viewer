@@ -14,6 +14,7 @@
 #-----------------------------------------------------------------------------
 
 import wx
+import random
 import wx.grid
 import distributionViewGlobal as gv
 
@@ -52,8 +53,7 @@ class PanelChart(wx.Panel):
         dc.SetPen(wx.Pen('WHITE'))
         dc.DrawRectangle(1, 1, self.appSize[0], 205)
         dc.DrawText('NetFetcher Delay Time Distribution', 2, 245)
-        xlabel = 'occurences' if self.readDisMode else 'occurences[x10]'
-        dc.DrawText(xlabel, -35, 225)
+        dc.DrawText('occurences', -35, 225)
         dc.DrawText('Delay[x1000 ns]', 700, -25)
         # Draw Axis and Grids:(Y delay time, x occurences)
         dc.SetPen(wx.Pen('#D5D5D5'))  # dc.SetPen(wx.Pen('#0AB1FF'))
@@ -65,7 +65,7 @@ class PanelChart(wx.Panel):
         for i in range(2, 22, 2):
             dc.DrawLine(2, i*10, w, i*10)  # Y-Grid
             dc.DrawLine(2, i*10, -5, i*10)  # Y-Axis
-            ylabel = str(self.maxCount//20 *i) if self.readDisMode else str(i).zfill(2)
+            ylabel = str(self.maxCount//20 *i) if self.readDisMode else str(i*10).zfill(3)
             dc.DrawText(ylabel, -25, i*10+5)  # format to ## int, such as 02
         # Draw the X-Axis
         for i in range(len(self.times)):
