@@ -28,9 +28,13 @@ DATA_F_PATH = "".join([dirpath, "\\data\\*.csv"]) if WINP else "".join([dirpath,
 
 CONFIG_FILE = "scripted_exp.bat"
 
+
 iDataMgr = None     # data manager.
 iChartPanel0 = None # History chart panel for module
 iChartPanel1 = None # History chart panel
 iSetupPanel = None  
-iModelType = 4      # Model Type currently displayed
-iDataType = 4       # Data Type currently displayed
+iModelType = 5      # Model Type currently displayed
+iDataType = 5       # Data Type currently displayed
+iUpdateRate = 2
+iLineStyle = 1
+

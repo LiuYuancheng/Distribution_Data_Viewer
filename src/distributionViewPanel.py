@@ -37,8 +37,9 @@ class PanelChart(wx.Panel):
         # all column will be change, the explaination is here: 
         # https://stackoverflow.com/questions/2739552/2d-list-has-weird-behavor-when-trying-to-modify-a-single-value
         self.times = [n for n in range(self.recNum//10)]  # X-Axis(time delay).
-        self.maxCount = 0       # max count of the delay in the current data set.
-        self.readDisMode = True # True: real display mode, False: fixed display mode.
+        self.maxCount = 0       # max count of the delay in the current data set.]
+        self.displayMode = 0 # 0 - Logarithmic scale, 1 - linear scale real, 2-linear scale fix
+        self.logScale = (20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000)
         self.labelInfo = ['Data1', 'Data2', 'Data3']
         self.Bind(wx.EVT_PAINT, self.onPaint)
         
@@ -54,19 +55,21 @@ class PanelChart(wx.Panel):
         dc.DrawRectangle(1, 1, self.appSize[0], 205)
         dc.DrawText('NetFetcher Delay Time Distribution', 2, 245)
         dc.DrawText('occurences', -35, 225)
-        dc.DrawText('Delay[x1000 ns]', 700, -25)
+        dc.DrawText('Delay[ ms ]', 700, -25)
         # Draw Axis and Grids:(Y delay time, x occurences)
         dc.SetPen(wx.Pen('#D5D5D5'))  # dc.SetPen(wx.Pen('#0AB1FF'))
         w, _ = self.appSize
         dc.DrawLine(1, 1, w, 1)
         dc.DrawLine(1, 1, 1, w)
-        self.maxCount = max([max(i) for i in self.dataD]) if self.readDisMode else 0
-        # Draw the Y-Axis
+        self.maxCount = max([max(i) for i in self.dataD]) if self.displayMode == 1 else 0
         for i in range(2, 22, 2):
             dc.DrawLine(2, i*10, w, i*10)  # Y-Grid
             dc.DrawLine(2, i*10, -5, i*10)  # Y-Axis
-            ylabel = str(self.maxCount//20 *i) if self.readDisMode else str(i*10).zfill(3)
-            dc.DrawText(ylabel, -25, i*10+5)  # format to ## int, such as 02
+            if self.displayMode == 0:
+                dc.DrawText(str(self.logScale[i//2-1]), -30, i*10+5)  # format to ## int, such as 02
+            else:
+                ylabel = str(self.maxCount//20 *i) if self.displayMode == 1 else str(i*10).zfill(3)
+                dc.DrawText(ylabel, -30, i*10+5)  # format to ## int, such as 02
         # Draw the X-Axis
         for i in range(len(self.times)):
             dc.DrawLine(i*20, 2, i*20, 200)  # X-Grid
@@ -79,18 +82,31 @@ class PanelChart(wx.Panel):
         item = ((self.labelInfo[0], 'RED'), 
                 (self.labelInfo[1], '#A5CDAA'), 
                 (self.labelInfo[2], 'BLUE'))
-        lineW = 1 if self.readDisMode else 2
         # Draw the charts.
         for idx, data in enumerate(self.dataD):
             (label, color) = item[idx]
             # Draw the line sample.
-            dc.SetPen(wx.Pen(color, width=lineW, style=wx.PENSTYLE_SOLID))
+            dc.SetPen(wx.Pen(color, width=gv.iLineStyle, style=wx.PENSTYLE_SOLID))
             dc.DrawText(label, idx*200+150, 220)
             dc.DrawLine(120+idx*200, 212, 120+idx*200+20, 212)
-            if self.readDisMode: 
-                dc.DrawSpline([(int(i*2+idx*2), int(data[i])*200//self.maxCount) for i in range(self.recNum)])
-            else:
-                dc.DrawSpline([(int(i*2+idx*2), min(200,int(data[i])*1)) for i in range(self.recNum)])
+            ptList = self.buildSplinePtList(data, idx)
+            dc.DrawSpline(ptList)
+
+
+    def buildSplinePtList(self, data, idx):
+        if self.displayMode == 0:
+            return [(int(i*2+idx*2), self.scaleCvrt(data[i]))for i in range(self.recNum)]
+        elif self.displayMode == 1:
+            return [(int(i*2+idx*2), int(data[i])*200//self.maxCount) for i in range(self.recNum)]
+        elif self.displayMode == 2:
+            return [(int(i*2+idx*2), min(200,int(data[i])*1)) for i in range(self.recNum)]
+        
+    def scaleCvrt(self, n):
+        for idx, val in enumerate(self.logScale):
+            if n <= val:
+                preVal = 0 if idx == 0 else self.logScale[idx-1]
+                return int((n-preVal)/float((val-preVal))*20+20*(idx))
+        return 400 # return the max 
 
 #----------------------------------------------------------------------------- 
     def onPaint(self, event):

@@ -25,7 +25,7 @@ import distributionVieweBCRun as btcRun
 
 PERIODIC = 500      # update in every 500ms
 SAMPLE_COUNT = 950  # 
-DEF_SIZE = (1920, 720) 
+DEF_SIZE = (1920, 750) 
 
 
 #-----------------------------------------------------------------------------
@@ -94,16 +94,10 @@ class distributionViewFrame(wx.Frame):
         hbox0.Add(self.chartCH0, flag=flagsR, border=2)
         hbox0.AddSpacer(10)
         self.disModeMCB =  wx.ComboBox(
-            self, -1, choices=['Dynamic display mode', 'Fixed display mode'], style=wx.CB_READONLY)
+            self, -1, choices=['Logarithmic scale', 'Linear scale: Dynamic', 'Linear scale: Fixed'], style=wx.CB_READONLY)
         self.disModeMCB .SetSelection(1)
         self.disModeMCB.Bind(wx.EVT_COMBOBOX, self.onDisModeSelection)
         hbox0.Add(self.disModeMCB, flag=flagsR, border=2)
-        hbox0.AddSpacer(10)
-        self.SampleRCH0 = wx.ComboBox(
-            self, -1, choices=['Sample Rate: '+str((i+1)*10) for i in range(10)], style=wx.CB_READONLY)
-        self.SampleRCH0.Bind(wx.EVT_COMBOBOX, self.onChangeSR)
-        self.SampleRCH0.SetSelection(3)
-        hbox0.Add(self.SampleRCH0, flag=flagsR, border=2)
         sizer.Add(hbox0, flag=flagsR, border=2)
         # Row index 1: display panel for the model.
         gv.iChartPanel0 = linechart1 = dvp.PanelChart(
@@ -125,7 +119,7 @@ class distributionViewFrame(wx.Frame):
         hbox1.Add(self.chartCH1, flag=flagsR, border=2)
         hbox1.AddSpacer(10)
         self.disModeDCB =  wx.ComboBox(
-            self, -1, choices=['Dynamic display mode', 'Fixed display mode'], style=wx.CB_READONLY)
+            self, -1, choices=['Logarithmic scale', 'Linear scale: Dynamic', 'Linear scale: Fixed'], style=wx.CB_READONLY)
         self.disModeDCB .SetSelection(0)
         self.disModeDCB.Bind(wx.EVT_COMBOBOX, self.onDisModeSelection)
         hbox1.Add(self.disModeDCB, flag=flagsR, border=2)
@@ -139,6 +133,30 @@ class distributionViewFrame(wx.Frame):
         gv.iChartPanel1 = linechart2 = dvp.PanelChart(
             self, 1, appSize=appSize, recNum=self.sampleCount)
         sizer.Add(linechart2, flag=flagsR, border=2)
+        sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
+                                style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        sizer.AddSpacer(5)
+        # Row index 4: display setting
+        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox2.Add(wx.StaticText(
+            self, label="Display Setting:"), flag=flagsR, border=2)
+        hbox2.AddSpacer(10)
+        self.updateRateCB = wx.ComboBox(
+            self, -1, choices=['Update Rate: %s s' %str(i+1) for i in range(5)], style=wx.CB_READONLY)
+        self.updateRateCB.SetSelection(1)
+        hbox2.Add(self.updateRateCB, flag=flagsR, border=2)
+        hbox2.AddSpacer(10)
+        self.lineStyleCB = wx.ComboBox(
+            self, -1, choices=['Line Style: thin', 'Line Style: thick'], style=wx.CB_READONLY)
+        self.lineStyleCB.SetSelection(0)
+        hbox2.Add(self.lineStyleCB, flag=flagsR, border=2)
+        hbox2.AddSpacer(10)
+        self.SampleRCH0 = wx.ComboBox(
+            self, -1, choices=['Sample Rate: '+str((i+1)*10) for i in range(10)], style=wx.CB_READONLY)
+        self.SampleRCH0.Bind(wx.EVT_COMBOBOX, self.onChangeSR)
+        self.SampleRCH0.SetSelection(3)
+        hbox2.Add(self.SampleRCH0, flag=flagsR, border=2)
+        sizer.Add(hbox2, flag=flagsR, border=2)
         return sizer
 
 #-----------------------------------------------------------------------------
@@ -160,7 +178,7 @@ class distributionViewFrame(wx.Frame):
 #-----------------------------------------------------------------------------
     def periodic(self, event):
         """ Call back every periodic time."""
-        if time.time() - self.lastPeriodicTime > 1:
+        if time.time() - self.lastPeriodicTime > gv.iUpdateRate:
             if not self.loadLock:
                 self.dataMgr.setModelD()
             gv.iChartPanel0.updateDisplay()
@@ -169,6 +187,10 @@ class distributionViewFrame(wx.Frame):
 #-----------------------------------------------------------------------------
     def onChangeSR(self, event):
         self.dataMgr.sampleRate= (int(self.SampleRCH0.GetSelection())+1)*10
+        self.dataMgr.setModelD()
+        self.dataMgr.setDataD()
+        gv.iChartPanel0.updateDisplay()
+        gv.iChartPanel1.updateDisplay()
         #gv.iChartPanel0.sampleRate = (int(self.SampleRCH0.GetSelection())+1)*10
         #gv.iChartPanel1.sampleRate = (int(self.SampleRCH0.GetSelection())+1)*10
 
@@ -180,8 +202,8 @@ class distributionViewFrame(wx.Frame):
 
 #-----------------------------------------------------------------------------
     def onDisModeSelection(self, event):
-        gv.iChartPanel0.readDisMode = True if self.disModeMCB.GetSelection() == 0 else False
-        gv.iChartPanel1.readDisMode = True if self.disModeDCB.GetSelection() == 0 else False
+        gv.iChartPanel0.displayMode = self.disModeMCB.GetSelection() 
+        gv.iChartPanel1.displayMode = self.disModeDCB.GetSelection() 
         gv.iChartPanel0.updateDisplay()
         gv.iChartPanel1.updateDisplay()
 
