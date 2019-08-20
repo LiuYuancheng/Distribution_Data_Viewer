@@ -43,8 +43,18 @@ class PanelChart(wx.Panel):
         self.logScale = (20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000)
         self.labelInfo = ['Data1', 'Data2', 'Data3']
         self.Bind(wx.EVT_PAINT, self.onPaint)
-        
-        
+
+#-----------------------------------------------------------------------------     
+    def _buildSplinePtList(self, data, idx):
+        """ build the Spline list draw on the chart."""
+        recNum = int(self.recNum*1.0/self.pixelScale)
+        if self.displayMode == 0:
+            return [(int(i*2*self.pixelScale+idx*2), self.scaleCvrt(data[i]))for i in range(recNum)]
+        elif self.displayMode == 1:
+            return [(int(i*2*self.pixelScale+idx*2), int(data[i])*200//self.maxCount) for i in range(recNum)]
+        elif self.displayMode == 2:
+            return [(int(i*2*self.pixelScale+idx*2), min(200,int(data[i])*1)) for i in range(recNum)]
+
 #-----------------------------------------------------------------------------        
     def clearData(self):
         """ Clear all the times data to 0 """
@@ -56,8 +66,8 @@ class PanelChart(wx.Panel):
         dc.SetPen(wx.Pen('WHITE'))
         dc.DrawRectangle(1, 1, self.appSize[0], 205)
         dc.DrawText('NetFetcher Delay Time Distribution', 2, 245)
-        dc.DrawText('occurences', -35, 225)
-        dc.DrawText('Delay[ Mus ]', 700, -25)
+        dc.DrawText('Occurences', -35, 225)
+        dc.DrawText('Delay[ microsecond ]', 700, -25)
         # Draw Axis and Grids:(Y delay time, x occurences)
         dc.SetPen(wx.Pen('#D5D5D5'))  # dc.SetPen(wx.Pen('#0AB1FF'))
         w, _ = self.appSize
@@ -92,25 +102,17 @@ class PanelChart(wx.Panel):
             dc.SetPen(wx.Pen(color, width=gv.iLineStyle, style=wx.PENSTYLE_SOLID))
             dc.DrawText(label, idx*200+150, 220)
             dc.DrawLine(120+idx*200, 212, 120+idx*200+20, 212)
-            ptList = self.buildSplinePtList(data, idx)
+            ptList = self._buildSplinePtList(data, idx)
             dc.DrawSpline(ptList)
 
-
-    def buildSplinePtList(self, data, idx):
-        recNum = int(self.recNum*1.0/self.pixelScale)
-        if self.displayMode == 0:
-            return [(int(i*2*self.pixelScale+idx*2), self.scaleCvrt(data[i]))for i in range(recNum)]
-        elif self.displayMode == 1:
-            return [(int(i*2*self.pixelScale+idx*2), int(data[i])*200//self.maxCount) for i in range(recNum)]
-        elif self.displayMode == 2:
-            return [(int(i*2*self.pixelScale+idx*2), min(200,int(data[i])*1)) for i in range(recNum)]
-        
+#----------------------------------------------------------------------------- 
     def scaleCvrt(self, n):
+        """ Convert the data from liner scale to the Logarithmic scale """
         for idx, val in enumerate(self.logScale):
             if n <= val:
                 preVal = 0 if idx == 0 else self.logScale[idx-1]
                 return int((n-preVal)/float((val-preVal))*20+20*(idx))
-        return 210 # return the max 
+        return 210  # return the max
 
 #----------------------------------------------------------------------------- 
     def onPaint(self, event):

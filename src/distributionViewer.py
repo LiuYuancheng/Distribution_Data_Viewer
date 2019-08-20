@@ -213,10 +213,12 @@ class distributionViewFrame(wx.Frame):
         #gv.iChartPanel0.sampleRate = (int(self.SampleRCH0.GetSelection())+1)*10
         #gv.iChartPanel1.sampleRate = (int(self.SampleRCH0.GetSelection())+1)*10
 
+#-----------------------------------------------------------------------------
     def onChangeUR(self, event):
         """ Change the update rate."""
         gv.iUpdateRate = self.updateRateCB.GetSelection()+1
 
+#-----------------------------------------------------------------------------
     def onChangeLS(self, event):
         """ Chnage the line style. """
         gv.iLineStyle = self.lineStyleCB.GetSelection()+1
@@ -236,7 +238,9 @@ class distributionViewFrame(wx.Frame):
         gv.iChartPanel0.updateDisplay()
         gv.iChartPanel1.updateDisplay()
 
+#-----------------------------------------------------------------------------
     def onChangePct(self, event):
+        """ Change the percentile. """
         if self.pctCB.GetSelection() == 0:
             gv.iChartPanel0.pixelScale = 1
             gv.iChartPanel1.pixelScale = 1
@@ -253,6 +257,7 @@ class distributionViewFrame(wx.Frame):
         self.dataMgr.setModelChIdx(self.chartCH0.GetSelection())
         gv.iChartPanel0.updateDisplay()
 
+#-----------------------------------------------------------------------------
     def onStartExp(self, mode):
         """ Run the experiment once."""
         print("Start the experiment.")        
@@ -271,6 +276,7 @@ class distributionViewFrame(wx.Frame):
             self.infoWindow.Bind(wx.EVT_CLOSE, self.infoWinClose)
             self.infoWindow.Show()
 
+#-----------------------------------------------------------------------------
     def onSetupCheckExp(self, event):
         """ Pop-up the experiment setup window. """
         if self.infoWindow is None and gv.iSetupPanel is None:
