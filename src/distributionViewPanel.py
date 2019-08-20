@@ -38,10 +38,12 @@ class PanelChart(wx.Panel):
         # https://stackoverflow.com/questions/2739552/2d-list-has-weird-behavor-when-trying-to-modify-a-single-value
         self.times = [n for n in range(self.recNum//10)]  # X-Axis(time delay).
         self.maxCount = 0       # max count of the delay in the current data set.]
+        self.pixelScale = 1   
         self.displayMode = 0 # 0 - Logarithmic scale, 1 - linear scale real, 2-linear scale fix
         self.logScale = (20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000)
         self.labelInfo = ['Data1', 'Data2', 'Data3']
         self.Bind(wx.EVT_PAINT, self.onPaint)
+        
         
 #-----------------------------------------------------------------------------        
     def clearData(self):
@@ -55,7 +57,7 @@ class PanelChart(wx.Panel):
         dc.DrawRectangle(1, 1, self.appSize[0], 205)
         dc.DrawText('NetFetcher Delay Time Distribution', 2, 245)
         dc.DrawText('occurences', -35, 225)
-        dc.DrawText('Delay[ ms ]', 700, -25)
+        dc.DrawText('Delay[ Mus ]', 700, -25)
         # Draw Axis and Grids:(Y delay time, x occurences)
         dc.SetPen(wx.Pen('#D5D5D5'))  # dc.SetPen(wx.Pen('#0AB1FF'))
         w, _ = self.appSize
@@ -71,10 +73,11 @@ class PanelChart(wx.Panel):
                 ylabel = str(self.maxCount//20 *i) if self.displayMode == 1 else str(i*10).zfill(3)
                 dc.DrawText(ylabel, -30, i*10+5)  # format to ## int, such as 02
         # Draw the X-Axis
+        pixelU = int(20*self.pixelScale)
         for i in range(len(self.times)):
-            dc.DrawLine(i*20, 2, i*20, 200)  # X-Grid
-            dc.DrawLine(i*20, 2, i*20, -5)  # X-Axis
-            dc.DrawText(str(self.times[i]).zfill(2), i*20-5, -5)
+            dc.DrawLine(i*pixelU, 2, i*pixelU, 200)  # X-Grid
+            dc.DrawLine(i*pixelU, 2, i*pixelU, -5)  # X-Axis
+            dc.DrawText(str(self.times[i]).zfill(2), i*pixelU-5, -5)
 
 #--PanelChart--------------------------------------------------------------------
     def _drawFG(self, dc):
@@ -94,12 +97,13 @@ class PanelChart(wx.Panel):
 
 
     def buildSplinePtList(self, data, idx):
+        recNum = int(self.recNum*1.0/self.pixelScale)
         if self.displayMode == 0:
-            return [(int(i*2+idx*2), self.scaleCvrt(data[i]))for i in range(self.recNum)]
+            return [(int(i*2*self.pixelScale+idx*2), self.scaleCvrt(data[i]))for i in range(recNum)]
         elif self.displayMode == 1:
-            return [(int(i*2+idx*2), int(data[i])*200//self.maxCount) for i in range(self.recNum)]
+            return [(int(i*2*self.pixelScale+idx*2), int(data[i])*200//self.maxCount) for i in range(recNum)]
         elif self.displayMode == 2:
-            return [(int(i*2+idx*2), min(200,int(data[i])*1)) for i in range(self.recNum)]
+            return [(int(i*2*self.pixelScale+idx*2), min(200,int(data[i])*1)) for i in range(recNum)]
         
     def scaleCvrt(self, n):
         for idx, val in enumerate(self.logScale):

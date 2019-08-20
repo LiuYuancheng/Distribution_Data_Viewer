@@ -18,15 +18,16 @@ import time
 import glob
 import wx # use wx to build the UI.
 import random
+import numpy as np
 # Import the local modules
 import distributionViewGlobal as gv
 import distributionViewPanel as dvp
 import distributionVieweBCRun as btcRun
 
 PERIODIC = 500      # update in every 500ms
-SAMPLE_COUNT = 950  # 
-DEF_SIZE = (1920, 750) 
-
+SAMPLE_COUNT = 930  # 
+DEF_SIZE = (1920, 750)
+UPDATE_U = 0.5      # update time unit for test.
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -167,6 +168,14 @@ class distributionViewFrame(wx.Frame):
         self.SampleRCH0.SetSelection(2)
         hbox2.Add(self.SampleRCH0, flag=flagsR, border=2)
         sizer.Add(hbox2, flag=flagsR, border=2)
+
+        hbox2.AddSpacer(10)
+        self.pctCB = wx.ComboBox(
+            self, -1, choices=['Percentile:100.0', 'Percentile:99.9'], style=wx.CB_READONLY)
+        self.pctCB.Bind(wx.EVT_COMBOBOX, self.onChangePct)
+        self.pctCB.SetSelection(0)
+        hbox2.Add(self.pctCB, flag=flagsR, border=2)
+
         return sizer
 
 #-----------------------------------------------------------------------------
@@ -188,7 +197,7 @@ class distributionViewFrame(wx.Frame):
 #-----------------------------------------------------------------------------
     def periodic(self, event):
         """ Call back every periodic time."""
-        if time.time() - self.lastPeriodicTime > gv.iUpdateRate:
+        if time.time() - self.lastPeriodicTime > gv.iUpdateRate*UPDATE_U:
             if not self.loadLock:
                 self.dataMgr.setModelD()
             gv.iChartPanel0.updateDisplay()
@@ -224,6 +233,17 @@ class distributionViewFrame(wx.Frame):
     def onDisModeSelection(self, event):
         gv.iChartPanel0.displayMode = self.disModeMCB.GetSelection() 
         gv.iChartPanel1.displayMode = self.disModeDCB.GetSelection() 
+        gv.iChartPanel0.updateDisplay()
+        gv.iChartPanel1.updateDisplay()
+
+    def onChangePct(self, event):
+        if self.pctCB.GetSelection() == 0:
+            gv.iChartPanel0.pixelScale = 1
+            gv.iChartPanel1.pixelScale = 1
+        else:
+            gv.iChartPanel0.pixelScale = self.sampleCount*1.0/self.dataMgr.percentile
+            gv.iChartPanel1.pixelScale = self.sampleCount*1.0/self.dataMgr.percentile
+
         gv.iChartPanel0.updateDisplay()
         gv.iChartPanel1.updateDisplay()
 
@@ -278,6 +298,8 @@ class distributionDataMgr(object):
         self.loadDataD()    # load data from data folder.
         self.setModelD()
         self.setDataD()
+        self.percentile = np.percentile(self.dataD, 99.9)//1000
+        print("=============== %s" %str(self.percentile))
 
 #-----------------------------------------------------------------------------
     def loadModelD(self):
