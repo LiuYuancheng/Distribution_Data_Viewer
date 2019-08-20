@@ -205,9 +205,11 @@ class distributionViewFrame(wx.Frame):
         #gv.iChartPanel1.sampleRate = (int(self.SampleRCH0.GetSelection())+1)*10
 
     def onChangeUR(self, event):
+        """ Change the update rate."""
         gv.iUpdateRate = self.updateRateCB.GetSelection()+1
 
     def onChangeLS(self, event):
+        """ Chnage the line style. """
         gv.iLineStyle = self.lineStyleCB.GetSelection()+1
         gv.iChartPanel0.updateDisplay()
         gv.iChartPanel1.updateDisplay()

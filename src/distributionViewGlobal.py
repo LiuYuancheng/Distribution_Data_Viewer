@@ -25,10 +25,10 @@ ICON_PATH = "".join([dirpath, "\\img\\title.png"]) if WINP else "".join([dirpath
 MODE_F_PATH = "".join([dirpath, "\\model\\*.csv"]) if WINP else "".join([dirpath, "/model/*.csv"])
 # Data folder:
 DATA_F_PATH = "".join([dirpath, "\\data\\*.csv"]) if WINP else "".join([dirpath, "/data/*.csv"])
-
+# The config file for the netfetcher program.
 CONFIG_FILE = ("model_scripted_exp.bat", "check_scripted_exp.bat")
 
-iMainFame = None
+iMainFame = None    # mail frame
 iDataMgr = None     # data manager.
 iChartPanel0 = None # History chart panel for module
 iChartPanel1 = None # History chart panel

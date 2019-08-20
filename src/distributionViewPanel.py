@@ -209,11 +209,11 @@ class PanelSetting(wx.Panel):
         hbox.Add(self.fetchBt, flag=flagsR, border=2)
         self.fetchBt.Enable(False)
         sizer.Add(hbox, flag=flagsR, border=2)
-        
         return sizer
 
-
+#-----------------------------------------------------------------------------
     def onStartExp(self, event):
+        """ Start the experiment."""
         gv.iMainFame.onStartExp(self.mode)
 
 #-----------------------------------------------------------------------------
