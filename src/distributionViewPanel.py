@@ -40,7 +40,8 @@ class PanelChart(wx.Panel):
         self.maxCount = 0       # max count of the delay in the current data set.]
         self.pixelScale = 1   
         self.displayMode = 0 # 0 - Logarithmic scale, 1 - linear scale real, 2-linear scale fix
-        self.logScale = (20, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000)
+        self.logScale = (10, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000)
+        self.logScaleShow = (1, 0, 1, 0, 0, 1, 0, 0, 1, 0) # 0 - hide, 1- show.
         self.labelInfo = ['Data1', 'Data2', 'Data3']
         self.Bind(wx.EVT_PAINT, self.onPaint)
 
@@ -78,7 +79,9 @@ class PanelChart(wx.Panel):
             dc.DrawLine(2, i*10, w, i*10)  # Y-Grid
             dc.DrawLine(2, i*10, -5, i*10)  # Y-Axis
             if self.displayMode == 0:
-                dc.DrawText(str(self.logScale[i//2-1]), -30, i*10+5)  # format to ## int, such as 02
+                scaleIdx = i//2-1
+                if self.logScaleShow[scaleIdx]:
+                    dc.DrawText(str(self.logScale[scaleIdx]), -30, i*10+5)  # format to ## int, such as 02
             else:
                 ylabel = str(self.maxCount//20 *i) if self.displayMode == 1 else str(i*10).zfill(3)
                 dc.DrawText(ylabel, -30, i*10+5)  # format to ## int, such as 02

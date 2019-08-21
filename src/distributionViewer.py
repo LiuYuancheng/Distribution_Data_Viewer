@@ -44,6 +44,7 @@ class distributionViewFrame(wx.Frame):
         self.sampleCount = SAMPLE_COUNT
         self.infoWindow = None  # popup window to do the setting.
         self.updateLock = False # lock the main program update.
+        self.synAdjust = True   # Synchronize adjustment on 2 display panels.
         self.displayChoice = \
             ('Type 0: Timestamping Delay',
              'Type 1: Preprocessing Delay',
@@ -160,13 +161,18 @@ class distributionViewFrame(wx.Frame):
         self.SampleRCH0.Bind(wx.EVT_COMBOBOX, self.onChangeSR)
         self.SampleRCH0.SetSelection(2)
         hbox2.Add(self.SampleRCH0, flag=flagsR, border=2)
-        sizer.Add(hbox2, flag=flagsR, border=2)
         hbox2.AddSpacer(10)
         self.pctCB = wx.ComboBox(
             self, -1, choices=['Percentile:100.0', 'Percentile:99.9'], style=wx.CB_READONLY)
         self.pctCB.Bind(wx.EVT_COMBOBOX, self.onChangePct)
         self.pctCB.SetSelection(0)
         hbox2.Add(self.pctCB, flag=flagsR, border=2)
+        hbox2.AddSpacer(10)
+        self.sycAdjustCB = wx.CheckBox(self, label = 'Synchronize Adjust') 
+        self.sycAdjustCB.SetValue(True)
+        self.sycAdjustCB.Bind(wx.EVT_CHECKBOX, self.onChangeSyn)
+        hbox2.Add(self.sycAdjustCB, flag=flagsR, border=2)
+        sizer.Add(hbox2, flag=flagsR, border=2)
         return sizer
 
 #--distributionViewFrame-------------------------------------------------------
@@ -204,6 +210,9 @@ class distributionViewFrame(wx.Frame):
         """ Change the model display data type."""
         self.dataMgr.setTypeChIdx(self.chartTypeCH0.GetSelection(), 'M')
         gv.iChartPanel0.updateDisplay()
+        if self.synAdjust:
+            self.chartTypeCH1.SetSelection(self.chartTypeCH0.GetSelection())
+            self.onChangeDCT(None)
 
 #--distributionViewFrame-------------------------------------------------------
     def onChangeLS(self, event):
@@ -232,6 +241,17 @@ class distributionViewFrame(wx.Frame):
         gv.iChartPanel1.updateDisplay()
 
 #--distributionViewFrame-------------------------------------------------------
+    def onChangeSyn(self, evnet):
+        """ Change the panel display Synchronize setting."""
+        self.synAdjust = self.sycAdjustCB.GetValue()
+        if self.synAdjust:
+            self.chartTypeCH1.Enable(False)
+            self.disModeDCB.Enable(False)
+        else:
+            self.chartTypeCH1.Enable(True)
+            self.disModeDCB.Enable(True)
+
+#--distributionViewFrame-------------------------------------------------------
     def onChangeUR(self, event):
         """ Change the update rate."""
         gv.iUpdateRate = self.updateRateCB.GetSelection()+1
@@ -240,6 +260,8 @@ class distributionViewFrame(wx.Frame):
     def onChangeYS(self, event):
         """ Change the display Y-Axis Scale.(Logarithmic/linear)"""
         gv.iChartPanel0.displayMode = self.disModeMCB.GetSelection() 
+        if self.synAdjust:
+            self.disModeDCB.SetSelection(self.disModeMCB.GetSelection())
         gv.iChartPanel1.displayMode = self.disModeDCB.GetSelection() 
         gv.iChartPanel0.updateDisplay()
         gv.iChartPanel1.updateDisplay()
@@ -289,7 +311,7 @@ class distributionDataMgr(object):
         self.dataD = []     # data folder data set.
         print("DistributionDataMgr: Loading data.")
         self.loadCSVData('M')   # load data from model folder.
-        self.loadCSVData('D')    # load data from data folder.
+        self.loadCSVData('D')   # load data from data folder.
         print("DistributionDataMgr: Set data for display.")
         self.setPanelData('M')
         self.setPanelData('D')
@@ -310,21 +332,24 @@ class distributionDataMgr(object):
             print("The input type tag must be defined!")
             return
         filePaths = None
+        rowTypeIdx = 0 
         if tag == 'M':
             filePaths = glob.glob(gv.MODE_F_PATH)
             self.modelD = []
             gv.iChartPanel0.setLabel(filePaths)
+            rowTypeIdx = self.ModeChIdx
         else:
             filePaths = glob.glob(gv.DATA_F_PATH)
             self.dataD = []
             gv.iChartPanel1.setLabel(filePaths)
+            rowTypeIdx = self.DataChIdx
         for fileName in filePaths:
             dataSet = []
             with open(fileName) as f:
                 f_csv = csv.reader(f)
                 _ = next(f_csv)  # skip the csv header.
                 for row in f_csv:
-                    i = int(row[self.DataChIdx+1]) if self.DataChIdx < 5 else (int(row[3])+int(row[4]))
+                    i = int(row[rowTypeIdx+1]) if rowTypeIdx < 5 else (int(row[3])+int(row[4]))
                     dataSet.append(i)
             if tag == 'M':
                 self.modelD.append(dataSet)
@@ -359,7 +384,7 @@ class distributionDataMgr(object):
 #--distributionDataMgr---------------------------------------------------------
     def periodic(self, now):
         """ Call back every periodic time."""
-        self.loadCSVData('M') # load 
+        self.setPanelData('M') # load 
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------

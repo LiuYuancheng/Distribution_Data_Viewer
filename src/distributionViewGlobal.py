@@ -35,6 +35,6 @@ iChartPanel1 = None # History chart panel
 iSetupPanel = None  
 iModelType = 5      # Model Type currently displayed
 iDataType = 5       # Data Type currently displayed
-iUpdateRate = 2
+iUpdateRate = 2     # Time period to update the 
 iLineStyle = 1
 
