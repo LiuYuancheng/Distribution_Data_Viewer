@@ -18,7 +18,6 @@ WINP = sys.platform.startswith('win')
 
 # Application name and version. setting
 APP_NAME = 'NetFetcher Distribution Data Viewer'
-
 # program title icon
 ICON_PATH = "".join([dirpath, "\\img\\title.png"]) if WINP else "".join([dirpath, "/img/title.png"])
 # module folder:
@@ -32,7 +31,8 @@ iMainFame = None    # mail frame
 iDataMgr = None     # data manager.
 iChartPanel0 = None # History chart panel for module
 iChartPanel1 = None # History chart panel
-iSetupPanel = None  
+iSetupPanel = None
+iCPMode = False
 iModelType = 5      # Model Type currently displayed
 iDataType = 5       # Data Type currently displayed
 iUpdateRate = 2     # Time period to update the 

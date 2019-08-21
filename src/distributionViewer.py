@@ -56,6 +56,7 @@ class distributionViewFrame(wx.Frame):
         menubar = wx.MenuBar()  # Creat the function menu bar.
         menubar.Append(wx.Menu(), '&Help')
         self.SetMenuBar(menubar)
+        #self.SetSizer(self.buildUISizerC())
         self.SetSizer(self.buildUISizer())
         # The csv data manager.
         self.dataMgr = distributionDataMgr(self)
@@ -69,6 +70,119 @@ class distributionViewFrame(wx.Frame):
         # Show the frame.
         self.SetDoubleBuffered(True)
         self.Refresh(False)
+
+#--distributionViewFrame-------------------------------------------------------
+    def buildUISizerC(self):
+        """ Init the frame user interface and return the sizer."""
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        width, _ = wx.GetDisplaySize()
+        appSize = (width, 700) if width == 1920 else (1600, 700)
+        sizer = wx.BoxSizer(wx.VERTICAL) # main frame sizer.
+        # Row idx 0: [model] experiment display selection.
+        hbox0 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox0.Add(wx.Button(self, label='Data Source: [Model]', size=(
+            140, 23)), flag=flagsR, border=2)
+        hbox0.AddSpacer(10)
+        self.expMSBt = wx.Button(self, label='Setup', size=(60, 23))
+        hbox0.Add(self.expMSBt, flag=flagsR, border=2)
+        self.expMSBt.Bind(wx.EVT_BUTTON, self.onSetupModelExp)
+        hbox0.AddSpacer(10)
+        self.chartTypeCH0 = wx.ComboBox(
+            self, -1, choices=self.displayChoice, style=wx.CB_READONLY)
+        self.chartTypeCH0.Bind(wx.EVT_COMBOBOX, self.onChangeDMT)
+        self.chartTypeCH0.SetSelection(gv.iModelType)
+        hbox0.Add(self.chartTypeCH0, flag=flagsR, border=2)
+        hbox0.AddSpacer(10)
+        choice = ('Logarithmic scale: 10^n', 'Linear scale: Dynamic', 'Linear scale: Fixed')
+        self.disModeMCB = wx.ComboBox(self, -1, choices=choice, style=wx.CB_READONLY)
+        self.disModeMCB .SetSelection(0)
+        self.disModeMCB.Bind(wx.EVT_COMBOBOX, self.onChangeYS)
+        hbox0.Add(self.disModeMCB, flag=flagsR, border=2)
+        sizer.Add(hbox0, flag=flagsR, border=2)
+        # Row idx 1: display panel for the model.
+        nb = wx.Notebook(self)
+
+
+        gv.iChartPanel0 = dvp.PanelChart(
+            nb, 4, appSize=(width, 290), recNum=self.sampleCount)
+        #sizer.Add(gv.iChartPanel0, flag=flagsR, border=2)
+        nb.AddPage(gv.iChartPanel0 , "Model")
+
+        gv.iChartPanel1 = dvp.PanelChart(
+            nb, 1, appSize=(width, 290), recNum=self.sampleCount)
+        #sizer.Add(gv.iChartPanel1, flag=flagsR, border=2)
+        nb.AddPage(gv.iChartPanel1 , "Data")
+        sizer.Add(nb, flag=flagsR, border=2)
+
+        sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
+                                style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        sizer.AddSpacer(2)
+        # Row idx 2: [data] experiment display selection.
+        hbox1 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox1.Add(wx.Button(self, label='Data Source: [Data]', size=(
+            140, 23)), flag=flagsR, border=2)
+        hbox1.AddSpacer(10)
+        self.expCSBt = wx.Button(self, label='Setup', size=(60, 23))
+        hbox1.Add(self.expCSBt, flag=flagsR, border=2)
+        self.expCSBt.Bind(wx.EVT_BUTTON, self.onSetupCheckExp)
+        hbox1.AddSpacer(10)
+        self.chartTypeCH1 = wx.ComboBox(
+            self, -1, choices=self.displayChoice, style=wx.CB_READONLY)
+        self.chartTypeCH1.Bind(wx.EVT_COMBOBOX, self.onChangeDCT)
+        self.chartTypeCH1.SetSelection(gv.iDataType)
+        hbox1.Add(self.chartTypeCH1, flag=flagsR, border=2)
+        hbox1.AddSpacer(10)
+        self.disModeDCB =  wx.ComboBox(
+            self, -1, choices=choice, style=wx.CB_READONLY)
+        self.disModeDCB .SetSelection(0)
+        self.disModeDCB.Bind(wx.EVT_COMBOBOX, self.onChangeYS)
+        hbox1.Add(self.disModeDCB, flag=flagsR, border=2)
+        hbox1.AddSpacer(10)
+        self.pauseBt = wx.Button(
+            self, label='Reload Data', style=wx.BU_LEFT, size=(80, 23))
+        self.pauseBt.Bind(wx.EVT_BUTTON, self.reloadData)
+        hbox1.Add(self.pauseBt, flag=flagsR, border=2)
+        sizer.Add(hbox1, flag=flagsR, border=2)
+        # Row idx 3: display panel for the model.
+        sizer.AddSpacer(2)
+        sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
+                                style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        sizer.AddSpacer(2)
+        # Row dix 4: display setting
+        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
+        hbox2.Add(wx.StaticText(
+            self, label="Display Setting:"), flag=flagsR, border=2)
+        hbox2.AddSpacer(10)
+        self.updateRateCB = wx.ComboBox(
+            self, -1, choices=['Update Rate: %s s' %str(i+1) for i in range(5)], style=wx.CB_READONLY)
+        self.updateRateCB.SetSelection(1)
+        self.updateRateCB.Bind(wx.EVT_COMBOBOX, self.onChangeUR)
+        hbox2.Add(self.updateRateCB, flag=flagsR, border=2)
+        hbox2.AddSpacer(10)
+        self.lineStyleCB = wx.ComboBox(
+            self, -1, choices=['Line Style: thin', 'Line Style: thick'], style=wx.CB_READONLY)
+        self.lineStyleCB.SetSelection(0)
+        self.lineStyleCB.Bind(wx.EVT_COMBOBOX, self.onChangeLS)
+        hbox2.Add(self.lineStyleCB, flag=flagsR, border=2)
+        hbox2.AddSpacer(10)
+        self.SampleRCH0 = wx.ComboBox(
+            self, -1, choices=['Sample Count: '+str((i+1)*10) for i in range(10)], style=wx.CB_READONLY)
+        self.SampleRCH0.Bind(wx.EVT_COMBOBOX, self.onChangeSR)
+        self.SampleRCH0.SetSelection(2)
+        hbox2.Add(self.SampleRCH0, flag=flagsR, border=2)
+        hbox2.AddSpacer(10)
+        self.pctCB = wx.ComboBox(
+            self, -1, choices=['Percentile:100.0', 'Percentile:99.9'], style=wx.CB_READONLY)
+        self.pctCB.Bind(wx.EVT_COMBOBOX, self.onChangePct)
+        self.pctCB.SetSelection(0)
+        hbox2.Add(self.pctCB, flag=flagsR, border=2)
+        hbox2.AddSpacer(10)
+        self.sycAdjustCB = wx.CheckBox(self, label = 'Synchronize Adjust') 
+        self.sycAdjustCB.SetValue(True)
+        self.sycAdjustCB.Bind(wx.EVT_CHECKBOX, self.onChangeSyn)
+        hbox2.Add(self.sycAdjustCB, flag=flagsR, border=2)
+        sizer.Add(hbox2, flag=flagsR, border=2)
+        return sizer
 
 #--distributionViewFrame-------------------------------------------------------
     def buildUISizer(self):
@@ -99,8 +213,7 @@ class distributionViewFrame(wx.Frame):
         hbox0.Add(self.disModeMCB, flag=flagsR, border=2)
         sizer.Add(hbox0, flag=flagsR, border=2)
         # Row idx 1: display panel for the model.
-        gv.iChartPanel0 = dvp.PanelChart(
-            self, 4, appSize=appSize, recNum=self.sampleCount)
+        gv.iChartPanel0 = dvp.PanelChart( self, 4, appSize=(width, 290), recNum=self.sampleCount)
         sizer.Add(gv.iChartPanel0, flag=flagsR, border=2)
         sizer.AddSpacer(2)
         sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
@@ -133,7 +246,7 @@ class distributionViewFrame(wx.Frame):
         hbox1.Add(self.pauseBt, flag=flagsR, border=2)
         sizer.Add(hbox1, flag=flagsR, border=2)
         # Row idx 3: display panel for the model.
-        gv.iChartPanel1 =  dvp.PanelChart(self, 1, appSize=appSize, recNum=self.sampleCount)
+        gv.iChartPanel1 =  dvp.PanelChart(self, 1, appSize=(width, 290), recNum=self.sampleCount)
         sizer.Add(gv.iChartPanel1, flag=flagsR, border=2)
         sizer.AddSpacer(2)
         sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
@@ -368,6 +481,7 @@ class distributionDataMgr(object):
             for num in random.sample(dataSet, len(dataSet)*self.sampleRate//100):
                 if num//1000 > SAMPLE_COUNT: continue  # filter the too big data.
                 displayPanel.dataD[idx][num//1000] += 1
+        
         # temperary for compare. 
         if tag == 'M':
             displayPanel.dataD[-1] = gv.iChartPanel1.dataD[0]

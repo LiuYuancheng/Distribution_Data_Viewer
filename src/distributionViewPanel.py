@@ -26,7 +26,7 @@ class PanelChart(wx.Panel):
     """
     def __init__(self, parent, dataSetNum, appSize=(1600, 290), recNum=750):
         """ Init the panel."""
-        wx.Panel.__init__(self, parent, size=(appSize[0], 290))
+        wx.Panel.__init__(self, parent, size=appSize)
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.recNum = recNum    # hole many revode we are going to show.
         self.appSize = appSize  # the panel size.
@@ -43,7 +43,7 @@ class PanelChart(wx.Panel):
         self.displayMode = 0 # 0 - Logarithmic scale, 1 - linear scale real, 2-linear scale fix
         self.logScale = (10, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000)
         self.logScaleShow = (1, 0, 1, 0, 0, 1, 0, 0, 1, 0) # 0 - hide, 1- show.
-        self.labelInfo = ['Data1', 'Data2', 'Data3','Data4']
+        self.labelInfo = ['Data1', 'Data2', 'Data3', 'exp-data']
         self.Bind(wx.EVT_PAINT, self.onPaint)
 
 #-----------------------------------------------------------------------------     
@@ -66,9 +66,10 @@ class PanelChart(wx.Panel):
     def _drawBG(self, dc):
         """ Draw the line chart background."""
         dc.SetPen(wx.Pen('WHITE'))
-        dc.DrawRectangle(1, 1, self.appSize[0], 205)
-        dc.DrawText('NetFetcher Delay Time Distribution', 2, 245)
-        dc.DrawText('Occurences', -35, 225)
+        (x, y) = self.appSize
+        dc.DrawRectangle(1, 1, x, y-90)
+        dc.DrawText('NetFetcher Delay Time Distribution', 2, y-45)
+        dc.DrawText('Occurences', -35, y-75)
         dc.DrawText('Delay[ microsecond ]', 700, -25)
         # Draw Axis and Grids:(Y delay time, x occurences)
         dc.SetPen(wx.Pen('#D5D5D5'))  # dc.SetPen(wx.Pen('#0AB1FF'))
@@ -108,9 +109,9 @@ class PanelChart(wx.Panel):
             dc.SetPen(wx.Pen(color, width=gv.iLineStyle, style=wx.PENSTYLE_SOLID))
             if idx == 3: 
                 dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
-
             dc.DrawText(label, idx*200+150, 220)
             dc.DrawLine(120+idx*200, 212, 120+idx*200+20, 212)
+            if idx == 3: idx = 0 
             ptList = self._buildSplinePtList(data, idx)
             dc.DrawSpline(ptList)
 
@@ -128,7 +129,7 @@ class PanelChart(wx.Panel):
         """ Main panel drawing function."""
         dc = wx.PaintDC(self)
         # set the axis orientation area and fmt to up + right direction.
-        dc.SetDeviceOrigin(40, 250)
+        dc.SetDeviceOrigin(40, self.appSize[1]-40)
         dc.SetAxisOrientation(True, True)
         # set the text font 
         font = dc.GetFont()
