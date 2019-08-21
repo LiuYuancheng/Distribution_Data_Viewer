@@ -33,6 +33,7 @@ class PanelChart(wx.Panel):
         self.updateFlag = True  # flag whether we update the diaplay area
         self.dataSetNum = dataSetNum
         self.dataD = [[0]*recNum for _ in range(dataSetNum)]
+        self.cpdataD = None
         # Above line can not use [[0]*num]*num, otherwise change one element 
         # all column will be change, the explaination is here: 
         # https://stackoverflow.com/questions/2739552/2d-list-has-weird-behavor-when-trying-to-modify-a-single-value
@@ -42,7 +43,7 @@ class PanelChart(wx.Panel):
         self.displayMode = 0 # 0 - Logarithmic scale, 1 - linear scale real, 2-linear scale fix
         self.logScale = (10, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000)
         self.logScaleShow = (1, 0, 1, 0, 0, 1, 0, 0, 1, 0) # 0 - hide, 1- show.
-        self.labelInfo = ['Data1', 'Data2', 'Data3']
+        self.labelInfo = ['Data1', 'Data2', 'Data3','Data4']
         self.Bind(wx.EVT_PAINT, self.onPaint)
 
 #-----------------------------------------------------------------------------     
@@ -97,12 +98,17 @@ class PanelChart(wx.Panel):
         """ Draw the front ground data chart line."""
         item = ((self.labelInfo[0], 'RED'), 
                 (self.labelInfo[1], '#529955'), 
-                (self.labelInfo[2], 'BLUE'))
+                (self.labelInfo[2], 'BLUE'),
+                (self.labelInfo[3], 'BLACK')
+                )
         # Draw the charts.
         for idx, data in enumerate(self.dataD):
             (label, color) = item[idx]
             # Draw the line sample.
             dc.SetPen(wx.Pen(color, width=gv.iLineStyle, style=wx.PENSTYLE_SOLID))
+            if idx == 3: 
+                dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
+
             dc.DrawText(label, idx*200+150, 220)
             dc.DrawLine(120+idx*200, 212, 120+idx*200+20, 212)
             ptList = self._buildSplinePtList(data, idx)

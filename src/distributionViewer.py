@@ -100,7 +100,7 @@ class distributionViewFrame(wx.Frame):
         sizer.Add(hbox0, flag=flagsR, border=2)
         # Row idx 1: display panel for the model.
         gv.iChartPanel0 = dvp.PanelChart(
-            self, 3, appSize=appSize, recNum=self.sampleCount)
+            self, 4, appSize=appSize, recNum=self.sampleCount)
         sizer.Add(gv.iChartPanel0, flag=flagsR, border=2)
         sizer.AddSpacer(2)
         sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
@@ -368,6 +368,9 @@ class distributionDataMgr(object):
             for num in random.sample(dataSet, len(dataSet)*self.sampleRate//100):
                 if num//1000 > SAMPLE_COUNT: continue  # filter the too big data.
                 displayPanel.dataD[idx][num//1000] += 1
+        # temperary for compare. 
+        if tag == 'M':
+            displayPanel.dataD[-1] = gv.iChartPanel1.dataD[0]
 
 #--distributionDataMgr---------------------------------------------------------
     def setTypeChIdx(self, idx, tag):
