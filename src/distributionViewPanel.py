@@ -93,7 +93,7 @@ class PanelChart(wx.Panel):
     def _drawFG(self, dc):
         """ Draw the front ground data chart line."""
         item = ((self.labelInfo[0], 'RED'), 
-                (self.labelInfo[1], '#A5CDAA'), 
+                (self.labelInfo[1], '#529955'), 
                 (self.labelInfo[2], 'BLUE'))
         # Draw the charts.
         for idx, data in enumerate(self.dataD):
