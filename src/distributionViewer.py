@@ -57,7 +57,8 @@ class distributionViewFrame(wx.Frame):
         menubar.Append(wx.Menu(), '&Help')
         self.SetMenuBar(menubar)
         #self.SetSizer(self.buildUISizerC())
-        self.SetSizer(self.buildUISizer())
+        uiSizer = self.buildUISizerCpmode() if gv.iCPMode else self.buildUISizer()
+        self.SetSizer(uiSizer)
         # The csv data manager.
         self.dataMgr = distributionDataMgr(self)
         # Init the thread to call experiment program.
@@ -72,7 +73,7 @@ class distributionViewFrame(wx.Frame):
         self.Refresh(False)
 
 #--distributionViewFrame-------------------------------------------------------
-    def buildUISizerC(self):
+    def buildUISizerCpmode(self):
         """ Init the frame user interface and return the sizer."""
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         width, _ = wx.GetDisplaySize()
@@ -80,7 +81,7 @@ class distributionViewFrame(wx.Frame):
         sizer = wx.BoxSizer(wx.VERTICAL) # main frame sizer.
         # Row idx 0: [model] experiment display selection.
         hbox0 = wx.BoxSizer(wx.HORIZONTAL)
-        hbox0.Add(wx.Button(self, label='Data Source: [Model]', size=(
+        hbox0.Add(wx.Button(self, label='Data Source:', size=(
             140, 23)), flag=flagsR, border=2)
         hbox0.AddSpacer(10)
         self.expMSBt = wx.Button(self, label='Setup', size=(60, 23))
@@ -98,18 +99,21 @@ class distributionViewFrame(wx.Frame):
         self.disModeMCB .SetSelection(0)
         self.disModeMCB.Bind(wx.EVT_COMBOBOX, self.onChangeYS)
         hbox0.Add(self.disModeMCB, flag=flagsR, border=2)
+        hbox0.AddSpacer(10)
+        self.cpAdjustCB = wx.CheckBox(self, label = 'Compare mode') 
+        self.cpAdjustCB.SetValue(False)
+        self.cpAdjustCB.Bind(wx.EVT_CHECKBOX, self.onChangeCPMode)
+        hbox0.Add(self.cpAdjustCB, flag=flagsR, border=2)
         sizer.Add(hbox0, flag=flagsR, border=2)
         # Row idx 1: display panel for the model.
         nb = wx.Notebook(self)
-
-
         gv.iChartPanel0 = dvp.PanelChart(
-            nb, 4, appSize=(width, 290), recNum=self.sampleCount)
+            nb, 4, appSize=(width, 520), recNum=self.sampleCount)
         #sizer.Add(gv.iChartPanel0, flag=flagsR, border=2)
         nb.AddPage(gv.iChartPanel0 , "Model")
 
         gv.iChartPanel1 = dvp.PanelChart(
-            nb, 1, appSize=(width, 290), recNum=self.sampleCount)
+            nb, 1, appSize=(width, 520), recNum=self.sampleCount)
         #sizer.Add(gv.iChartPanel1, flag=flagsR, border=2)
         nb.AddPage(gv.iChartPanel1 , "Data")
         sizer.Add(nb, flag=flagsR, border=2)
@@ -352,6 +356,11 @@ class distributionViewFrame(wx.Frame):
         self.dataMgr.setPanelData('D')
         gv.iChartPanel0.updateDisplay()
         gv.iChartPanel1.updateDisplay()
+
+#--distributionViewFrame-------------------------------------------------------
+    def onChangeCPMode(self, evnet):
+        """ Change the panel display Synchronize setting."""
+        gv.iChartPanel0.compareOverlay = self.cpAdjustCB.GetValue()
 
 #--distributionViewFrame-------------------------------------------------------
     def onChangeSyn(self, evnet):

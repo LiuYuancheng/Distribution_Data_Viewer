@@ -39,7 +39,8 @@ class PanelChart(wx.Panel):
         # https://stackoverflow.com/questions/2739552/2d-list-has-weird-behavor-when-trying-to-modify-a-single-value
         self.times = [n for n in range(self.recNum//10)]  # X-Axis(time delay).
         self.maxCount = 0       # max count of the delay in the current data set.]
-        self.pixelScale = 1   
+        self.pixelScale = 1
+        self.compareOverlay = False
         self.displayMode = 0 # 0 - Logarithmic scale, 1 - linear scale real, 2-linear scale fix
         self.logScale = (10, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000)
         self.logScaleShow = (1, 0, 1, 0, 0, 1, 0, 0, 1, 0) # 0 - hide, 1- show.
@@ -50,12 +51,13 @@ class PanelChart(wx.Panel):
     def _buildSplinePtList(self, data, idx):
         """ build the Spline list draw on the chart."""
         recNum = int(self.recNum*1.0/self.pixelScale)
+        deltY = self.appSize[1]//200
         if self.displayMode == 0:
             return [(int(i*2*self.pixelScale+idx*2), self.scaleCvrt(data[i]))for i in range(recNum)]
         elif self.displayMode == 1:
-            return [(int(i*2*self.pixelScale+idx*2), int(data[i])*200//self.maxCount) for i in range(recNum)]
+            return [(int(i*2*self.pixelScale+idx*2), int(data[i])*200*deltY//self.maxCount) for i in range(recNum)]
         elif self.displayMode == 2:
-            return [(int(i*2*self.pixelScale+idx*2), min(200,int(data[i])*1)) for i in range(recNum)]
+            return [(int(i*2*self.pixelScale+idx*2), min(200*deltY,int(data[i])*deltY)) for i in range(recNum)]
 
 #-----------------------------------------------------------------------------        
     def clearData(self):
@@ -77,20 +79,22 @@ class PanelChart(wx.Panel):
         dc.DrawLine(1, 1, w, 1)
         dc.DrawLine(1, 1, 1, w)
         self.maxCount = max([max(i) for i in self.dataD]) if self.displayMode == 1 else 0
+
+        deltY = y//200*10
         for i in range(2, 22, 2):
-            dc.DrawLine(2, i*10, w, i*10)  # Y-Grid
-            dc.DrawLine(2, i*10, -5, i*10)  # Y-Axis
+            dc.DrawLine(2, i*deltY, w, i*deltY)  # Y-Grid
+            dc.DrawLine(2, i*deltY, -5, i*deltY)  # Y-Axis
             if self.displayMode == 0:
                 scaleIdx = i//2-1
                 if self.logScaleShow[scaleIdx]:
-                    dc.DrawText(str(self.logScale[scaleIdx]), -30, i*10+5)  # format to ## int, such as 02
+                    dc.DrawText(str(self.logScale[scaleIdx]), -30, i*deltY+5)  # format to ## int, such as 02
             else:
                 ylabel = str(self.maxCount//20 *i) if self.displayMode == 1 else str(i*10).zfill(3)
-                dc.DrawText(ylabel, -30, i*10+5)  # format to ## int, such as 02
+                dc.DrawText(ylabel, -30, i*deltY+5)  # format to ## int, such as 02
         # Draw the X-Axis
         pixelU = int(20*self.pixelScale)
         for i in range(len(self.times)):
-            dc.DrawLine(i*pixelU, 2, i*pixelU, 200)  # X-Grid
+            dc.DrawLine(i*pixelU, 2, i*pixelU, deltY*20)  # X-Grid
             dc.DrawLine(i*pixelU, 2, i*pixelU, -5)  # X-Axis
             dc.DrawText(str(self.times[i]).zfill(2), i*pixelU-5, -5)
 
@@ -103,26 +107,39 @@ class PanelChart(wx.Panel):
                 (self.labelInfo[3], 'BLACK')
                 )
         # Draw the charts.
+        y = self.appSize[1] - 75
         for idx, data in enumerate(self.dataD):
             (label, color) = item[idx]
+            if len(self.dataD) == 1:
+                (label, color) = item[-1]
             # Draw the line sample.
             dc.SetPen(wx.Pen(color, width=gv.iLineStyle, style=wx.PENSTYLE_SOLID))
-            if idx == 3: 
-                dc.SetPen(wx.Pen(color, width=2, style=wx.PENSTYLE_SOLID))
-            dc.DrawText(label, idx*200+150, 220)
-            dc.DrawLine(120+idx*200, 212, 120+idx*200+20, 212)
-            if idx == 3: idx = 0 
-            ptList = self._buildSplinePtList(data, idx)
-            dc.DrawSpline(ptList)
+            dc.SetBrush(wx.Brush(color))
+            dc.DrawText(label, idx*200+150, y+10)
+            dc.DrawRectangle(120+idx*200, y, 20, 6)
+            if idx < 3:
+                ptList = self._buildSplinePtList(data, idx)
+                dc.DrawSpline(ptList)
+            elif self.compareOverlay:
+                dc.SetPen(wx.Pen(wx.Colour((120, 120, 120)), width=2, style=wx.PENSTYLE_SOLID))
+                ptList = self._buildSplinePtList(data, 0) # not slightly shift.
+                gdc = wx.GCDC(dc)
+                r, g, b, alph = 120, 120, 120, 128 # half transparent alph
+                gdc.SetBrush(wx.Brush(wx.Colour(r, g, b, alph)))  
+                gdc.DrawPolygon(ptList)
+                #dc.DrawSpline(ptList)
+
+
 
 #----------------------------------------------------------------------------- 
     def scaleCvrt(self, n):
         """ Convert the data from liner scale to the Logarithmic scale """
+        deltY = self.appSize[1]//200*20
         for idx, val in enumerate(self.logScale):
             if n <= val:
                 preVal = 0 if idx == 0 else self.logScale[idx-1]
-                return int((n-preVal)/float((val-preVal))*20+20*(idx))
-        return 210  # return the max
+                return int((n-preVal)/float((val-preVal))*deltY+deltY*(idx))
+        return deltY*10  # return the max
 
 #----------------------------------------------------------------------------- 
     def onPaint(self, event):
