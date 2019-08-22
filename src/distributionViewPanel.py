@@ -117,11 +117,11 @@ class PanelChart(wx.Panel):
             dc.SetBrush(wx.Brush(color))
             dc.DrawText(label, idx*200+150, y+10)
             dc.DrawRectangle(120+idx*200, y, 20, 6)
-            if idx < 3:
+            if idx < 3 and len(self.dataD) !=1 :
                 ptList = self._buildSplinePtList(data, idx)
                 dc.DrawSpline(ptList)
-            elif self.compareOverlay:
-                dc.SetPen(wx.Pen(wx.Colour((120, 120, 120)), width=2, style=wx.PENSTYLE_SOLID))
+            elif self.compareOverlay or len(self.dataD) == 1:
+                dc.SetPen(wx.Pen(wx.Colour((210, 210, 210)), width=2, style=wx.PENSTYLE_SOLID))
                 ptList = self._buildSplinePtList(data, 0) # not slightly shift.
                 gdc = wx.GCDC(dc)
                 r, g, b, alph = 120, 120, 120, 128 # half transparent alph
