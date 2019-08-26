@@ -98,26 +98,34 @@ class PanelChart(wx.Panel):
 #--PanelChart--------------------------------------------------------------------
     def _drawFG(self, dc):
         """ Draw the front ground data distribution chart line."""
-        item = ((self.labelInfo[0], 'RED'), 
-                (self.labelInfo[1], '#529955'), 
-                (self.labelInfo[2], 'BLUE'),
-                (self.labelInfo[3], 'BLACK')
+        item = ((self.labelInfo[0], (200, 0, 0)),       # red
+                (self.labelInfo[1], (82, 153, 85)),     # green 
+                (self.labelInfo[2], (0, 0, 200)),       # blue 
+                (self.labelInfo[3], (210, 210, 210))    # gray
                 )
+        gdc = None
+        if gv.iLineStyle == 3: gdc = wx.GCDC(dc) # can only have one gdc.
         # Draw the charts.
         y = self.appSize[1] - 75
         for idx, data in enumerate(self.dataD):
             (label, color) = item[idx] if self.dataSetNum != 1 else item[-1]
             # Draw the line sample.
             dc.SetPen(wx.Pen(color, width=gv.iLineStyle, style=wx.PENSTYLE_SOLID))
-            dc.SetBrush(wx.Brush(color))
+            dc.SetBrush(wx.Brush(wx.Colour(color)))
             dc.DrawText(label, idx*200+150, y+10)
             dc.DrawRectangle(120+idx*200, y, 20, 6)
-            if self.dataSetNum != 1 and  idx < self.dataSetNum -1:
-                dc.DrawSpline(self._buildSplinePtList(data, idx)) # slightly shift idx.
+            if self.dataSetNum != 1 and idx < self.dataSetNum -1:
+                if gv.iLineStyle != 3:
+                    dc.DrawSpline(self._buildSplinePtList(data, idx)) # slightly shift idx.
+                else:
+                    r, g, b = color # half transparent alph
+                    alph = 128
+                    gdc.SetBrush(wx.Brush(wx.Colour(r, g, b, alph)))
+                    gdc.DrawPolygon(self._buildSplinePtList(data, idx))
             elif self.compareOverlay or self.dataSetNum == 1:
                 dc.SetPen(wx.Pen(wx.Colour((210, 210, 210)),
                                  width=2, style=wx.PENSTYLE_SOLID))
-                gdc = wx.GCDC(dc)
+                if gdc is None: gdc = wx.GCDC(dc)
                 r, g, b, alph = 120, 120, 120, 128  # half transparent alph
                 gdc.SetBrush(wx.Brush(wx.Colour(r, g, b, alph)))
                 gdc.DrawPolygon(self._buildSplinePtList(data, 0)) # not slightly shift.

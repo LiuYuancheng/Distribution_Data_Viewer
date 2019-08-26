@@ -54,10 +54,13 @@ class distributionViewFrame(wx.Frame):
              'Type 5: Input/Output Delay (Type 2 + Type 3)')
         # Init the frame UI.
         menubar = wx.MenuBar()  # Creat the function menu bar.
-        menubar.Append(wx.Menu(), '&Help')
+        fileMenu = wx.Menu()
+        menubar.Append(fileMenu, '&Help')
+        fileItem = fileMenu.Append(wx.ID_HELP, 'Help', 'Help Information')
+        self.Bind(wx.EVT_MENU, self.onHelp, fileItem)
         self.SetMenuBar(menubar)
         #self.SetSizer(self.buildUISizerC())
-        uiSizer = self.buildUISizerCpmode() if gv.iCPMode else self.buildUISizer()
+        uiSizer = self.buildUISizerCpmode() if gv.iCPMode else self.buildUISizerNlmode()
         self.SetSizer(uiSizer)
         # The csv data manager.
         self.dataMgr = distributionDataMgr(self)
@@ -74,10 +77,9 @@ class distributionViewFrame(wx.Frame):
 
 #--distributionViewFrame-------------------------------------------------------
     def buildUISizerCpmode(self):
-        """ Init the frame user interface and return the sizer."""
+        """ Init the frame user interface and return the sizer.(Compare mode)"""
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         width, _ = wx.GetDisplaySize()
-        appSize = (width, 700) if width == 1920 else (1600, 700)
         sizer = wx.BoxSizer(wx.VERTICAL) # main frame sizer.
         # Row idx 0: [model] experiment display selection.
         nb = wx.Notebook(self)
@@ -154,48 +156,12 @@ class distributionViewFrame(wx.Frame):
                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         sizer.AddSpacer(2)
         # Row dix 4: display setting
-        hbox2 = wx.BoxSizer(wx.HORIZONTAL)
-        hbox2.Add(wx.StaticText(
-            self, label="Display Setting:"), flag=flagsR, border=2)
-        hbox2.AddSpacer(10)
-        self.updateRateCB = wx.ComboBox(
-            self, -1, choices=['Update Rate: %s s' %str(i+1) for i in range(5)], style=wx.CB_READONLY)
-        self.updateRateCB.SetSelection(1)
-        self.updateRateCB.Bind(wx.EVT_COMBOBOX, self.onChangeUR)
-        hbox2.Add(self.updateRateCB, flag=flagsR, border=2)
-        hbox2.AddSpacer(10)
-        self.lineStyleCB = wx.ComboBox(
-            self, -1, choices=['Line Style: thin', 'Line Style: thick'], style=wx.CB_READONLY)
-        self.lineStyleCB.SetSelection(0)
-        self.lineStyleCB.Bind(wx.EVT_COMBOBOX, self.onChangeLS)
-        hbox2.Add(self.lineStyleCB, flag=flagsR, border=2)
-        hbox2.AddSpacer(10)
-        self.SampleRCH0 = wx.ComboBox(
-            self, -1, choices=['Sample Count: '+str((i+1)*10) for i in range(10)], style=wx.CB_READONLY)
-        self.SampleRCH0.Bind(wx.EVT_COMBOBOX, self.onChangeSR)
-        self.SampleRCH0.SetSelection(2)
-        hbox2.Add(self.SampleRCH0, flag=flagsR, border=2)
-        hbox2.AddSpacer(10)
-        self.pctCB = wx.ComboBox(
-            self, -1, choices=['Percentile:100.0', 'Percentile:99.9'], style=wx.CB_READONLY)
-        self.pctCB.Bind(wx.EVT_COMBOBOX, self.onChangePct)
-        self.pctCB.SetSelection(0)
-        hbox2.Add(self.pctCB, flag=flagsR, border=2)
-        hbox2.AddSpacer(10)
-        self.fontSelBt = wx.Button(self, label='Font Selection', style=wx.BU_LEFT, size=(100, 23))
-        self.fontSelBt.Bind(wx.EVT_BUTTON, self.onChangeFont)
-        hbox2.Add(self.fontSelBt, flag=flagsR, border=2)
-        hbox2.AddSpacer(10)
-        self.sycAdjustCB = wx.CheckBox(self, label = 'Synchronize Adjust') 
-        self.sycAdjustCB.SetValue(True)
-        self.sycAdjustCB.Bind(wx.EVT_CHECKBOX, self.onChangeSyn)
-        hbox2.Add(self.sycAdjustCB, flag=flagsR, border=2)
-        sizer.Add(hbox2, flag=flagsR, border=2)
+        sizer.Add(self._buildUISizerSetting(), flag=flagsR, border=2)
         return sizer
 
 #--distributionViewFrame-------------------------------------------------------
-    def buildUISizer(self):
-        """ Init the frame user interface and return the sizer."""
+    def buildUISizerNlmode(self):
+        """ Init the frame user interface and return the sizer.(Normal mode)"""
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         width, _ = wx.GetDisplaySize()
         appSize = (width, 700) if width == 1920 else (1600, 700)
@@ -261,6 +227,14 @@ class distributionViewFrame(wx.Frame):
         sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         sizer.AddSpacer(2)
+        sizer.Add(self._buildUISizerSetting(), flag=flagsR, border=2)
+        return sizer
+
+#--distributionViewFrame-------------------------------------------------------
+    def _buildUISizerSetting(self):
+        """ Build the Setting UI sizer. 
+        """
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         # Row dix 4: display setting
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
         hbox2.Add(wx.StaticText(
@@ -273,7 +247,7 @@ class distributionViewFrame(wx.Frame):
         hbox2.Add(self.updateRateCB, flag=flagsR, border=2)
         hbox2.AddSpacer(10)
         self.lineStyleCB = wx.ComboBox(
-            self, -1, choices=['Line Style: thin', 'Line Style: thick'], style=wx.CB_READONLY)
+            self, -1, choices=['Line Style: thin', 'Line Style: thick', 'Line Style: Chart'], style=wx.CB_READONLY)
         self.lineStyleCB.SetSelection(0)
         self.lineStyleCB.Bind(wx.EVT_COMBOBOX, self.onChangeLS)
         hbox2.Add(self.lineStyleCB, flag=flagsR, border=2)
@@ -298,8 +272,8 @@ class distributionViewFrame(wx.Frame):
         self.sycAdjustCB.SetValue(True)
         self.sycAdjustCB.Bind(wx.EVT_CHECKBOX, self.onChangeSyn)
         hbox2.Add(self.sycAdjustCB, flag=flagsR, border=2)
-        sizer.Add(hbox2, flag=flagsR, border=2)
-        return sizer
+        return hbox2
+
 
 #--distributionViewFrame-------------------------------------------------------
     def infoWinClose(self, event):
@@ -407,6 +381,17 @@ class distributionViewFrame(wx.Frame):
         gv.iChartPanel1.displayMode = self.disModeDCB.GetSelection() 
         gv.iChartPanel0.updateDisplay()
         gv.iChartPanel1.updateDisplay()
+
+#--distributionViewFrame-------------------------------------------------------
+    def onHelp(self, event):
+        """ Pop-up the Help information window. """
+        wx.MessageBox(' If there is any bug, please contect: \n\n \
+                        Author:      Yuancheng Liu \n \
+                        Email:       liu_yuan_cheng@hotmail.com \n \
+                        Created:     2019/08/02 \n \
+                        Copyright:   NUS Singtel Cyber Security Research & Develo pment Laboratory \n \
+                        GitHub Link: https://github.com/LiuYuancheng/Distribution_Data_Viewer \n', 
+                    'Help', wx.OK)
 
 #--distributionViewFrame-------------------------------------------------------
     def onStartExp(self, mode):
