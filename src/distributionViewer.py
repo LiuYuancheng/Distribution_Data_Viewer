@@ -338,7 +338,7 @@ class distributionViewFrame(wx.Frame):
         setTag = self.pctCB.GetSelection()
         self.dataMgr.getDataPercentile(setTag)
         percentileVal = 1 if setTag == 0 else self.sampleCount*1.0/self.dataMgr.percentile
-        gv.iChartPanel0.pixelScale = gv.iChartPanel1.pixelScale = percentileVal
+        gv.iChartPanel0.percentileScale = gv.iChartPanel1.percentileScale = percentileVal
         gv.iChartPanel0.updateDisplay()
         gv.iChartPanel1.updateDisplay()
 

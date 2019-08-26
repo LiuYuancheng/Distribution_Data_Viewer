@@ -101,7 +101,7 @@ class PanelChart(wx.Panel):
         item = ((self.labelInfo[0], (200, 0, 0)),       # red
                 (self.labelInfo[1], (82, 153, 85)),     # green 
                 (self.labelInfo[2], (0, 0, 200)),       # blue 
-                (self.labelInfo[3], (210, 210, 210))    # gray
+                (self.labelInfo[3], (0, 0, 0))    # black
                 )
         gdc = None
         if gv.iLineStyle == 3: gdc = wx.GCDC(dc) # can only have one gdc.
