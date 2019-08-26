@@ -12,29 +12,31 @@
 import os, sys
 
 dirpath = os.getcwd()
-print("distributionViewGlobal: Current working directory is : %s" %dirpath)
+print("distributionViewerGlobal: Current working directory is : %s" %dirpath)
 
 WINP = sys.platform.startswith('win')
 
+#------<CONSTANTS>-------------------------------------------------------------
 # Application name and version. setting
 APP_NAME = 'NetFetcher Distribution Data Viewer'
-# program title icon
+# Program title icon
 ICON_PATH = "".join([dirpath, "\\img\\title.png"]) if WINP else "".join([dirpath, "/img/title.png"])
-# module folder:
+# Module folder:
 MODE_F_PATH = "".join([dirpath, "\\model\\*.csv"]) if WINP else "".join([dirpath, "/model/*.csv"])
 # Data folder:
 DATA_F_PATH = "".join([dirpath, "\\data\\*.csv"]) if WINP else "".join([dirpath, "/data/*.csv"])
 # The config file for the netfetcher program.
 CONFIG_FILE = ("model_scripted_exp.bat", "check_scripted_exp.bat")
 
+#-------<GLOBAL PARAMTERS>-----------------------------------------------------
 iMainFame = None    # mail frame
 iDataMgr = None     # data manager.
-iChartPanel0 = None # History chart panel for module
-iChartPanel1 = None # History chart panel
-iSetupPanel = None
-iCPMode = True
+iChartPanel0 = None # history chart panel for module
+iChartPanel1 = None # history chart panel for data.
+iSetupPanel = None  # experiment setup panel.
+iCPMode = True      # compare mode flag.
 iModelType = 5      # Model Type currently displayed
 iDataType = 5       # Data Type currently displayed
 iUpdateRate = 2     # Time period to update the 
-iLineStyle = 1
+iLineStyle = 1      # width of the chart line
 

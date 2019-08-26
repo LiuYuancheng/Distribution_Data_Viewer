@@ -343,8 +343,7 @@ class distributionViewFrame(wx.Frame):
 #--distributionViewFrame-------------------------------------------------------
     def onChangeFont(self, event):
         """ Change the panel text font."""
-        dlg = wx.FontDialog(self,wx.FontData()) 
-		
+        dlg = wx.FontDialog(self,wx.FontData())
         if dlg.ShowModal() == wx.ID_OK: 
             data = dlg.GetFontData() 
             font = data.GetChosenFont() 

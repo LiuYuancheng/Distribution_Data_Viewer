@@ -22,86 +22,82 @@ import distributionViewGlobal as gv
 #-----------------------------------------------------------------------------
 class PanelChart(wx.Panel):
     """ This function is used to provide lineChart wxPanel to show the all the 
-        data as a distribution line.
+        data as distribution lines.
     """
     def __init__(self, parent, dataSetNum, appSize=(1600, 290), recNum=750):
         """ Init the panel."""
         wx.Panel.__init__(self, parent, size=appSize)
         self.SetBackgroundColour(wx.Colour(200, 210, 200))
-        self.recNum = recNum    # hole many revode we are going to show.
+        self.recNum = recNum    # how many delay samples will be show on one chart.
         self.appSize = appSize  # the panel size.
         self.updateFlag = True  # flag whether we update the diaplay area
-        self.dataSetNum = dataSetNum
+        self.dataSetNum = dataSetNum    # how many charts.
         self.dataD = [[0]*recNum for _ in range(dataSetNum)]
-        self.cpdataD = None
         self.textFont = None    # Panel text font.
         # Above line can not use [[0]*num]*num, otherwise change one element 
         # all column will be change, the explaination is here: 
         # https://stackoverflow.com/questions/2739552/2d-list-has-weird-behavor-when-trying-to-modify-a-single-value
         self.times = [n for n in range(self.recNum//10)]  # X-Axis(time delay).
-        self.maxCount = 0       # max count of the delay in the current data set.]
-        self.pixelScale = 1
-        self.compareOverlay = False
+        self.maxCount = 0       # max count of the delay in the current data set.
+        self.percentileScale = 1     # how many pixel scale will extend for x-Axis. 
+        self.compareOverlay = False # Overlay the compare data.(compare data save in <self.dataD[-1]>)
         self.displayMode = 0 # 0 - Logarithmic scale, 1 - linear scale real, 2-linear scale fix
         self.logScale = (10, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000)
         self.logScaleShow = (1, 0, 1, 0, 0, 1, 0, 0, 1, 0) # 0 - hide, 1- show.
-        self.labelInfo = ['Data1', 'Data2', 'Data3', 'exp-data']
+        self.labelInfo = ['Data1', 'Data2', 'Data3', 'exp-data[compare]']
         self.Bind(wx.EVT_PAINT, self.onPaint)
 
-#-----------------------------------------------------------------------------     
+#--PanelChart------------------------------------------------------------------     
     def _buildSplinePtList(self, data, idx):
-        """ build the Spline list draw on the chart."""
-        recNum = int(self.recNum*1.0/self.pixelScale)
-        deltY = self.appSize[1]//200
+        """ build the spline pixel points list based on the display mode."""
+        recNum, deltY = int(self.recNum*1.0/self.percentileScale), self.appSize[1]//200
         if self.displayMode == 0:
-            return [(int(i*2*self.pixelScale+idx*2), self.scaleCvrt(data[i]))for i in range(recNum)]
+            return [(int(i*self.percentileScale+idx)*2, self._scaleCvrt(data[i])) for i in range(recNum)]
         elif self.displayMode == 1:
-            return [(int(i*2*self.pixelScale+idx*2), int(data[i])*200*deltY//self.maxCount) for i in range(recNum)]
+            return [(int(i*self.percentileScale+idx)*2, int(data[i])*200*deltY//self.maxCount) for i in range(recNum)]
         elif self.displayMode == 2:
-            return [(int(i*2*self.pixelScale+idx*2), min(200*deltY,int(data[i])*deltY)) for i in range(recNum)]
+            return [(int(i*self.percentileScale+idx)*2, min(200*deltY, int(data[i])*deltY)) for i in range(recNum)]
 
-#-----------------------------------------------------------------------------        
+#--PanelChart------------------------------------------------------------------      
     def clearData(self):
-        """ Clear all the times data to 0 """
+        """ Clear all the times data to 0."""
         self.dataD = [[0]*self.recNum for _ in range(self.dataSetNum)]
 
-#-----------------------------------------------------------------------------  
+#--PanelChart------------------------------------------------------------------ 
     def _drawBG(self, dc):
         """ Draw the line chart background."""
+        x, y = self.appSize
         dc.SetPen(wx.Pen('WHITE'))
-        (x, y) = self.appSize
         dc.DrawRectangle(1, 1, x, y-90)
         dc.DrawText('NetFetcher Delay Time Distribution', 2, y-45)
         dc.DrawText('Occurences', -35, y-75)
-        dc.DrawText('Delay[ microsecond ]', 700, -25)
-        # Draw Axis and Grids:(Y delay time, x occurences)
+        dc.DrawText('Delay[ microseconds ]', 700, -25)
+        # Draw Axis and Grids:(Y:delay time, X:occurences)
         dc.SetPen(wx.Pen('#D5D5D5'))  # dc.SetPen(wx.Pen('#0AB1FF'))
-        w, _ = self.appSize
-        dc.DrawLine(1, 1, w, 1)
-        dc.DrawLine(1, 1, 1, w)
-        self.maxCount = max([max(i) for i in self.dataD]) if self.displayMode == 1 else 0
-
-        deltY = y//200*10
-        for i in range(2, 22, 2):
-            dc.DrawLine(2, i*deltY, w, i*deltY)  # Y-Grid
-            dc.DrawLine(2, i*deltY, -5, i*deltY)  # Y-Axis
-            if self.displayMode == 0:
-                scaleIdx = i//2-1
+        # Draw the Y-Axis
+        dc.DrawLine(1, 1, 1, y)
+        deltY = y//200*20 # <- don't replace by y//100*10 or y//10
+        for i in range(1,11):
+            dc.DrawLine(-5, i*deltY, x, i*deltY)  # Y-Grid
+            if self.displayMode == 0:  # Logarithmic scale Y-Axis
+                scaleIdx = i-1
                 if self.logScaleShow[scaleIdx]:
-                    dc.DrawText(str(self.logScale[scaleIdx]), -30, i*deltY+5)  # format to ## int, such as 02
-            else:
-                ylabel = str(self.maxCount//20 *i) if self.displayMode == 1 else str(i*10).zfill(3)
-                dc.DrawText(ylabel, -30, i*deltY+5)  # format to ## int, such as 02
+                    # format to ## int, such as 02
+                    dc.DrawText(str(self.logScale[scaleIdx]), -30, i*deltY+5)
+            else:   # Linear scale Y-Axis
+                ylabel = str(self.maxCount//10 *i) if self.displayMode == 1 else str(i*20).zfill(3)
+                # format to ## int, such as 02
+                dc.DrawText(ylabel, -30, i*deltY+5)
         # Draw the X-Axis
-        pixelU = int(20*self.pixelScale)
+        dc.DrawLine(1, 1, x, 1)
+        pixelU = int(20*self.percentileScale)
         for i in range(len(self.times)):
-            dc.DrawLine(i*pixelU, 2, i*pixelU, deltY*20)  # X-Grid
-            dc.DrawLine(i*pixelU, 2, i*pixelU, -5)  # X-Axis
+            dc.DrawLine(i*pixelU, -5, i*pixelU, deltY*10)  # X-Grid
             dc.DrawText(str(self.times[i]).zfill(2), i*pixelU-5, -5)
 
 #--PanelChart--------------------------------------------------------------------
     def _drawFG(self, dc):
-        """ Draw the front ground data chart line."""
+        """ Draw the front ground data distribution chart line."""
         item = ((self.labelInfo[0], 'RED'), 
                 (self.labelInfo[1], '#529955'), 
                 (self.labelInfo[2], 'BLUE'),
@@ -110,39 +106,35 @@ class PanelChart(wx.Panel):
         # Draw the charts.
         y = self.appSize[1] - 75
         for idx, data in enumerate(self.dataD):
-            (label, color) = item[idx]
-            if len(self.dataD) == 1:
-                (label, color) = item[-1]
+            (label, color) = item[idx] if self.dataSetNum != 1 else item[-1]
             # Draw the line sample.
-            dc.SetPen(wx.Pen(color, width=gv.iLineStyle,
-                             style=wx.PENSTYLE_SOLID))
+            dc.SetPen(wx.Pen(color, width=gv.iLineStyle, style=wx.PENSTYLE_SOLID))
             dc.SetBrush(wx.Brush(color))
             dc.DrawText(label, idx*200+150, y+10)
             dc.DrawRectangle(120+idx*200, y, 20, 6)
-            if idx < 3 and len(self.dataD) != 1:
-                ptList = self._buildSplinePtList(data, idx)
-                dc.DrawSpline(ptList)
-            elif self.compareOverlay or len(self.dataD) == 1:
+            if self.dataSetNum != 1 and  idx < self.dataSetNum -1:
+                dc.DrawSpline(self._buildSplinePtList(data, idx)) # slightly shift idx.
+            elif self.compareOverlay or self.dataSetNum == 1:
                 dc.SetPen(wx.Pen(wx.Colour((210, 210, 210)),
                                  width=2, style=wx.PENSTYLE_SOLID))
-                # not slightly shift.
-                ptList = self._buildSplinePtList(data, 0)
                 gdc = wx.GCDC(dc)
                 r, g, b, alph = 120, 120, 120, 128  # half transparent alph
                 gdc.SetBrush(wx.Brush(wx.Colour(r, g, b, alph)))
-                gdc.DrawPolygon(ptList)
+                gdc.DrawPolygon(self._buildSplinePtList(data, 0)) # not slightly shift.
 
-#----------------------------------------------------------------------------- 
-    def scaleCvrt(self, n):
-        """ Convert the data from liner scale to the Logarithmic scale """
+#--PanelChart------------------------------------------------------------------  
+    def _scaleCvrt(self, n):
+        """ Convert the data from liner scale Y-axis to Logarithmic scale Y-axis."""
         deltY = self.appSize[1]//200*20
         for idx, val in enumerate(self.logScale):
             if n <= val:
+                # Get the previous scale.
                 preVal = 0 if idx == 0 else self.logScale[idx-1]
+                # Compare with the pervious scale calculate the delta-pixel distance.
                 return int((n-preVal)/float((val-preVal))*deltY+deltY*(idx))
         return deltY*10  # return the max
 
-#----------------------------------------------------------------------------- 
+#--PanelChart------------------------------------------------------------------ 
     def onPaint(self, event):
         """ Main panel drawing function."""
         dc = wx.PaintDC(self)
@@ -154,25 +146,26 @@ class PanelChart(wx.Panel):
             self.textFont  = dc.GetFont()
             self.textFont.SetPointSize(8)
         dc.SetFont(self.textFont)
+        # Calculate the Y-up max limit value if under linear dynamic mode.
+        self.maxCount = max([max(i) for i in self.dataD]) if self.displayMode == 1 else 0
         # draw the background 
         self._drawBG(dc)
         # draw the distribution chart.
         self._drawFG(dc)
 
-#----------------------------------------------------------------------------- 
+#--PanelChart------------------------------------------------------------------ 
     def periodic(self, event):
         """ Call back every periodic time."""
-        # Set the title of the frame.
         pass
 
-#-----------------------------------------------------------------------------  
+#--PanelChart------------------------------------------------------------------  
     def setLabel(self, labelList):
         """ Set the chart color label. <labelList>: the list of the CSV file's path."""
         splitChr = '\\' if gv.WINP else '/'
         for i in range(len(labelList)):
             self.labelInfo[i] = str(labelList[i].split(splitChr)[-1])[:-3]
 
-#----------------------------------------------------------------------------- 
+#--PanelChart------------------------------------------------------------------ 
     def updateDisplay(self, updateFlag=None):
         """ Set/Update the display: if called as updateDisplay() the function will 
             update the panel, if called as updateDisplay(updateFlag=?) the function 
@@ -187,7 +180,9 @@ class PanelChart(wx.Panel):
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelSetting(wx.Panel):
-    """ Experiment setup panel."""
+    """ Experiment setup panel. Create the experiment running *.bat file based
+        on the users's filled in data and call the experiment run program.
+    """
     def __init__(self, parent, mode):
         """ Init the panel."""
         wx.Panel.__init__(self, parent, size=(620, 250))
@@ -195,7 +190,7 @@ class PanelSetting(wx.Panel):
         self.SetBackgroundColour(wx.Colour(200, 200, 210))
         self.SetSizer(self.buidUISizer())
 
-#-----------------------------------------------------------------------------
+#--PanelSetting----------------------------------------------------------------
     def buidUISizer(self):
         """ Build the Panel UI"""
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -228,9 +223,8 @@ class PanelSetting(wx.Panel):
         #self.grid.Bind(wx.grid.EVT_GRID_LABEL_LEFT_CLICK, self.highLightMap)
         sizer.Add(self.grid, flag=flagsR, border=2)
         sizer.AddSpacer(5)
-
+        # Add the experiment bat file generation button.
         hbox = wx.BoxSizer(wx.HORIZONTAL)
-
         self.pauseBt = wx.Button(
             self, label='Calibration', style=wx.BU_LEFT, size=(100, 23))
         self.pauseBt.Bind(wx.EVT_BUTTON, self.onConstruct)
@@ -246,12 +240,12 @@ class PanelSetting(wx.Panel):
         sizer.Add(hbox, flag=flagsR, border=2)
         return sizer
 
-#-----------------------------------------------------------------------------
+#--PanelSetting----------------------------------------------------------------
     def onStartExp(self, event):
         """ Start the experiment."""
         gv.iMainFame.onStartExp(self.mode)
 
-#-----------------------------------------------------------------------------
+#--PanelSetting----------------------------------------------------------------
     def onConstruct(self, event):
         """ Create the experiment setup file based on data in the grid. """
         with open(gv.CONFIG_FILE[self.mode], 'w') as fh:
@@ -260,7 +254,7 @@ class PanelSetting(wx.Panel):
                 if self.grid.GetCellValue(i, 0) == '':continue
                 data = [self.grid.GetCellValue(i, j) for j in range(6)]
                 line = 'Run: '+data[0]+':'+data[1]+' ' + \
-                    data[2]+':'+data[3]+' '+data[4]+' '+data[5]
-                fh.write(line+'\n')
+                    data[2]+':'+data[3]+' '+data[4]+' '+data[5]+'\n'
+                fh.write(line)
                 fh.write('sleep1\n\n')
         self.fetchBt.Enable(True)
