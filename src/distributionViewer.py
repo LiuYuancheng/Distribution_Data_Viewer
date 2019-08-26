@@ -27,7 +27,7 @@ import distributionVieweBCRun as btcRun
 UPDATE_U = 1        # update time unit for test.
 PERIODIC = 500      # update in every 500ms
 SAMPLE_COUNT = 930  # how many sample at the Y-Axis
-DEF_SIZE = (1920, 750)
+DEF_SIZE = (1920, 680) if gv.iCPMode else (1920, 750)
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -80,75 +80,76 @@ class distributionViewFrame(wx.Frame):
         appSize = (width, 700) if width == 1920 else (1600, 700)
         sizer = wx.BoxSizer(wx.VERTICAL) # main frame sizer.
         # Row idx 0: [model] experiment display selection.
+        nb = wx.Notebook(self)
+        modelPanel = wx.Panel(nb, -1)
+        mpSizer = wx.BoxSizer(wx.VERTICAL) 
         hbox0 = wx.BoxSizer(wx.HORIZONTAL)
-        hbox0.Add(wx.Button(self, label='Data Source:', size=(
+        hbox0.Add(wx.Button(modelPanel, label='Data Source: [Model]', size=(
             140, 23)), flag=flagsR, border=2)
         hbox0.AddSpacer(10)
-        self.expMSBt = wx.Button(self, label='Setup', size=(60, 23))
+        self.expMSBt = wx.Button(modelPanel, label='Setup', size=(60, 23))
         hbox0.Add(self.expMSBt, flag=flagsR, border=2)
         self.expMSBt.Bind(wx.EVT_BUTTON, self.onSetupModelExp)
         hbox0.AddSpacer(10)
         self.chartTypeCH0 = wx.ComboBox(
-            self, -1, choices=self.displayChoice, style=wx.CB_READONLY)
+            modelPanel, -1, choices=self.displayChoice, style=wx.CB_READONLY)
         self.chartTypeCH0.Bind(wx.EVT_COMBOBOX, self.onChangeDMT)
         self.chartTypeCH0.SetSelection(gv.iModelType)
         hbox0.Add(self.chartTypeCH0, flag=flagsR, border=2)
         hbox0.AddSpacer(10)
         choice = ('Logarithmic scale: 10^n', 'Linear scale: Dynamic', 'Linear scale: Fixed')
-        self.disModeMCB = wx.ComboBox(self, -1, choices=choice, style=wx.CB_READONLY)
+        self.disModeMCB = wx.ComboBox(modelPanel, -1, choices=choice, style=wx.CB_READONLY)
         self.disModeMCB .SetSelection(0)
         self.disModeMCB.Bind(wx.EVT_COMBOBOX, self.onChangeYS)
         hbox0.Add(self.disModeMCB, flag=flagsR, border=2)
         hbox0.AddSpacer(10)
-        self.cpAdjustCB = wx.CheckBox(self, label = 'Compare mode') 
+        self.cpAdjustCB = wx.CheckBox(modelPanel, label = 'Compare mode') 
         self.cpAdjustCB.SetValue(False)
         self.cpAdjustCB.Bind(wx.EVT_CHECKBOX, self.onChangeCPMode)
         hbox0.Add(self.cpAdjustCB, flag=flagsR, border=2)
-        sizer.Add(hbox0, flag=flagsR, border=2)
+        mpSizer.Add(hbox0, flag=flagsR, border=2)
         # Row idx 1: display panel for the model.
-        nb = wx.Notebook(self)
         gv.iChartPanel0 = dvp.PanelChart(
-            nb, 4, appSize=(width, 520), recNum=self.sampleCount)
-        #sizer.Add(gv.iChartPanel0, flag=flagsR, border=2)
-        nb.AddPage(gv.iChartPanel0 , "Model")
-
-        gv.iChartPanel1 = dvp.PanelChart(
-            nb, 1, appSize=(width, 520), recNum=self.sampleCount)
-        #sizer.Add(gv.iChartPanel1, flag=flagsR, border=2)
-        nb.AddPage(gv.iChartPanel1 , "Data")
-        sizer.Add(nb, flag=flagsR, border=2)
-
-        sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
-                                style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
-        sizer.AddSpacer(2)
+            modelPanel, 4, appSize=(width, 520), recNum=self.sampleCount)
+        mpSizer.Add(gv.iChartPanel0, flag=flagsR, border=2)
+        modelPanel.SetSizer(mpSizer)
+        nb.AddPage(modelPanel , "Model")
+        dataPanel = wx.Panel(nb, -1)
+        dpSizer = wx.BoxSizer(wx.VERTICAL)
         # Row idx 2: [data] experiment display selection.
         hbox1 = wx.BoxSizer(wx.HORIZONTAL)
-        hbox1.Add(wx.Button(self, label='Data Source: [Data]', size=(
+        hbox1.Add(wx.Button(dataPanel, label='Data Source: [Data]', size=(
             140, 23)), flag=flagsR, border=2)
         hbox1.AddSpacer(10)
-        self.expCSBt = wx.Button(self, label='Setup', size=(60, 23))
+        self.expCSBt = wx.Button(dataPanel, label='Setup', size=(60, 23))
         hbox1.Add(self.expCSBt, flag=flagsR, border=2)
         self.expCSBt.Bind(wx.EVT_BUTTON, self.onSetupCheckExp)
         hbox1.AddSpacer(10)
         self.chartTypeCH1 = wx.ComboBox(
-            self, -1, choices=self.displayChoice, style=wx.CB_READONLY)
+            dataPanel, -1, choices=self.displayChoice, style=wx.CB_READONLY)
         self.chartTypeCH1.Bind(wx.EVT_COMBOBOX, self.onChangeDCT)
         self.chartTypeCH1.SetSelection(gv.iDataType)
         hbox1.Add(self.chartTypeCH1, flag=flagsR, border=2)
         hbox1.AddSpacer(10)
         self.disModeDCB =  wx.ComboBox(
-            self, -1, choices=choice, style=wx.CB_READONLY)
+            dataPanel, -1, choices=choice, style=wx.CB_READONLY)
         self.disModeDCB .SetSelection(0)
         self.disModeDCB.Bind(wx.EVT_COMBOBOX, self.onChangeYS)
         hbox1.Add(self.disModeDCB, flag=flagsR, border=2)
         hbox1.AddSpacer(10)
         self.pauseBt = wx.Button(
-            self, label='Reload Data', style=wx.BU_LEFT, size=(80, 23))
+            dataPanel, label='Reload Data', style=wx.BU_LEFT, size=(80, 23))
         self.pauseBt.Bind(wx.EVT_BUTTON, self.reloadData)
         hbox1.Add(self.pauseBt, flag=flagsR, border=2)
-        sizer.Add(hbox1, flag=flagsR, border=2)
+        dpSizer.Add(hbox1, flag=flagsR, border=2)
         # Row idx 3: display panel for the model.
-        sizer.AddSpacer(2)
+        gv.iChartPanel1 = dvp.PanelChart(
+            dataPanel, 1, appSize=(width, 520), recNum=self.sampleCount)
+        dpSizer.Add(gv.iChartPanel1, flag=flagsR, border=2)
+        dataPanel.SetSizer(dpSizer)
+        nb.AddPage(dataPanel , "Data")
+        sizer.Add(nb, flag=flagsR, border=2)
+        dpSizer.AddSpacer(2)
         sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         sizer.AddSpacer(2)
@@ -180,6 +181,10 @@ class distributionViewFrame(wx.Frame):
         self.pctCB.Bind(wx.EVT_COMBOBOX, self.onChangePct)
         self.pctCB.SetSelection(0)
         hbox2.Add(self.pctCB, flag=flagsR, border=2)
+        hbox2.AddSpacer(10)
+        self.fontSelBt = wx.Button(self, label='Font Selection', style=wx.BU_LEFT, size=(100, 23))
+        self.fontSelBt.Bind(wx.EVT_BUTTON, self.onChangeFont)
+        hbox2.Add(self.fontSelBt, flag=flagsR, border=2)
         hbox2.AddSpacer(10)
         self.sycAdjustCB = wx.CheckBox(self, label = 'Synchronize Adjust') 
         self.sycAdjustCB.SetValue(True)
@@ -285,6 +290,10 @@ class distributionViewFrame(wx.Frame):
         self.pctCB.SetSelection(0)
         hbox2.Add(self.pctCB, flag=flagsR, border=2)
         hbox2.AddSpacer(10)
+        self.fontSelBt = wx.Button(self, label='Font Selection', style=wx.BU_LEFT, size=(100, 23))
+        self.fontSelBt.Bind(wx.EVT_BUTTON, self.onChangeFont)
+        hbox2.Add(self.fontSelBt, flag=flagsR, border=2)
+        hbox2.AddSpacer(10)
         self.sycAdjustCB = wx.CheckBox(self, label = 'Synchronize Adjust') 
         self.sycAdjustCB.SetValue(True)
         self.sycAdjustCB.Bind(wx.EVT_CHECKBOX, self.onChangeSyn)
@@ -330,6 +339,18 @@ class distributionViewFrame(wx.Frame):
         if self.synAdjust:
             self.chartTypeCH1.SetSelection(self.chartTypeCH0.GetSelection())
             self.onChangeDCT(None)
+
+#--distributionViewFrame-------------------------------------------------------
+    def onChangeFont(self, event):
+        """ Change the panel text font."""
+        dlg = wx.FontDialog(self,wx.FontData()) 
+		
+        if dlg.ShowModal() == wx.ID_OK: 
+            data = dlg.GetFontData() 
+            font = data.GetChosenFont() 
+            gv.iChartPanel0.textFont = font
+            gv.iChartPanel1.textFont = font
+        dlg.Destroy() 
 
 #--distributionViewFrame-------------------------------------------------------
     def onChangeLS(self, event):
@@ -453,8 +474,7 @@ class distributionDataMgr(object):
         if not tag:
             print("The input type tag must be defined!")
             return
-        filePaths = None
-        rowTypeIdx = 0 
+        filePaths, rowTypeIdx = None, 0
         if tag == 'M':
             filePaths = glob.glob(gv.MODE_F_PATH)
             self.modelD = []
@@ -471,7 +491,8 @@ class distributionDataMgr(object):
                 f_csv = csv.reader(f)
                 _ = next(f_csv)  # skip the csv header.
                 for row in f_csv:
-                    i = int(row[rowTypeIdx+1]) if rowTypeIdx < 5 else (int(row[3])+int(row[4]))
+                    i = int(
+                        row[rowTypeIdx+1]) if rowTypeIdx < 5 else (int(row[3])+int(row[4]))
                     dataSet.append(i)
             if tag == 'M':
                 self.modelD.append(dataSet)
@@ -490,9 +511,8 @@ class distributionDataMgr(object):
             for num in random.sample(dataSet, len(dataSet)*self.sampleRate//100):
                 if num//1000 > SAMPLE_COUNT: continue  # filter the too big data.
                 displayPanel.dataD[idx][num//1000] += 1
-        
-        # temperary for compare. 
-        if tag == 'M':
+        # temperary for compare mode active. 
+        if tag == 'M' and gv.iChartPanel0.compareOverlay:
             displayPanel.dataD[-1] = gv.iChartPanel1.dataD[0]
 
 #--distributionDataMgr---------------------------------------------------------

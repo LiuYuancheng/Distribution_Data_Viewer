@@ -34,6 +34,7 @@ class PanelChart(wx.Panel):
         self.dataSetNum = dataSetNum
         self.dataD = [[0]*recNum for _ in range(dataSetNum)]
         self.cpdataD = None
+        self.textFont = None    # Panel text font.
         # Above line can not use [[0]*num]*num, otherwise change one element 
         # all column will be change, the explaination is here: 
         # https://stackoverflow.com/questions/2739552/2d-list-has-weird-behavor-when-trying-to-modify-a-single-value
@@ -113,23 +114,23 @@ class PanelChart(wx.Panel):
             if len(self.dataD) == 1:
                 (label, color) = item[-1]
             # Draw the line sample.
-            dc.SetPen(wx.Pen(color, width=gv.iLineStyle, style=wx.PENSTYLE_SOLID))
+            dc.SetPen(wx.Pen(color, width=gv.iLineStyle,
+                             style=wx.PENSTYLE_SOLID))
             dc.SetBrush(wx.Brush(color))
             dc.DrawText(label, idx*200+150, y+10)
             dc.DrawRectangle(120+idx*200, y, 20, 6)
-            if idx < 3 and len(self.dataD) !=1 :
+            if idx < 3 and len(self.dataD) != 1:
                 ptList = self._buildSplinePtList(data, idx)
                 dc.DrawSpline(ptList)
             elif self.compareOverlay or len(self.dataD) == 1:
-                dc.SetPen(wx.Pen(wx.Colour((210, 210, 210)), width=2, style=wx.PENSTYLE_SOLID))
-                ptList = self._buildSplinePtList(data, 0) # not slightly shift.
+                dc.SetPen(wx.Pen(wx.Colour((210, 210, 210)),
+                                 width=2, style=wx.PENSTYLE_SOLID))
+                # not slightly shift.
+                ptList = self._buildSplinePtList(data, 0)
                 gdc = wx.GCDC(dc)
-                r, g, b, alph = 120, 120, 120, 128 # half transparent alph
-                gdc.SetBrush(wx.Brush(wx.Colour(r, g, b, alph)))  
+                r, g, b, alph = 120, 120, 120, 128  # half transparent alph
+                gdc.SetBrush(wx.Brush(wx.Colour(r, g, b, alph)))
                 gdc.DrawPolygon(ptList)
-                #dc.DrawSpline(ptList)
-
-
 
 #----------------------------------------------------------------------------- 
     def scaleCvrt(self, n):
@@ -148,10 +149,11 @@ class PanelChart(wx.Panel):
         # set the axis orientation area and fmt to up + right direction.
         dc.SetDeviceOrigin(40, self.appSize[1]-40)
         dc.SetAxisOrientation(True, True)
-        # set the text font 
-        font = dc.GetFont()
-        font.SetPointSize(8)
-        dc.SetFont(font)
+        # set the text font
+        if self.textFont is None:
+            self.textFont  = dc.GetFont()
+            self.textFont.SetPointSize(8)
+        dc.SetFont(self.textFont)
         # draw the background 
         self._drawBG(dc)
         # draw the distribution chart.
