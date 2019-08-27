@@ -28,7 +28,7 @@ Compare display mode:
 
 This is the cmd to install 
 
-[wxPython]: https://wxpython.org/pages/downloads/index.html: 
+[wxPython]: https://wxpython.org/pages/downloads/index.html:	"wxPython"
 
 ```
 pip install -U wxPython
@@ -36,7 +36,7 @@ pip install -U wxPython
 
 This is the cmd to install 
 
-[numpy]: https://pypi.org/project/numpy/:
+[numpy]: https://pypi.org/project/numpy/:	"numpy"
 
 ```
 pip install numpy
@@ -52,11 +52,52 @@ python distributionViewer.py
 
 The tested data CSV files are in the 'data' and 'model' folder, the folder structure should be:
 
-![]()
+![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/folderStructure.png)
 
 ------
 
-###### Program Setup
+###### Program Data Display Selection : 
 
+We use the compare mode to show how to use the program: 
 
+Data source title bar: 
 
+![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/2019-08-27_104832.png)
+
+=> User can select to display different type of data and the Y-Axis scale format. Currently we provide 3 kinds of Y-Axis scale: 
+
+| Y-Axis scale type       | Scale range               | Data covered               |
+| ----------------------- | ------------------------- | -------------------------- |
+| Logarithmic scale: 10^n | [1, 10, 100, 1000, 10000] | All data                   |
+| Linear scale: Dynamic   | [1/10*max] *range(1, 11 ) | All data                   |
+| Linear scale: Fixed     | 20*range(1,11)            | occurrences  less than 200 |
+
+Fixed Y-Axis mode:
+
+![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/fixedView.png)
+
+Press the "Setup" button the setup window will pop up: 
+
+![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/setup.png)
+
+=> Fill in the data and click the "Calibration" button then the related netFetcher execution configuration *.bat file will be created, then press the "BatchRun" button the netFetcher program will be executed and the related data will be put in "Model" and "data" folder.
+
+Click the "compare mode" check box, both the [Model] and [data] data will be drawn on the Model display panel: 
+
+![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/2019-08-27_104846.png)
+
+------
+
+###### Program Display Setting: 
+
+The display setting can be change in the button display setting bar: 
+
+![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/2019-08-27_104856.png)
+
+The mode data display rate can be change in 2sec ~ 5 sec. The program will sample count and data percentile can also be changed from the drop down menu. 
+
+Press the "Font Selection" button the font change window will pop-up: 
+
+![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/2019-08-27_104908.png)
+
+Check the "Synchronized Adjust" check box the [model] and [data] display will show the same change when user change one of the data display selection setting. 
