@@ -98,28 +98,26 @@ class PanelChart(wx.Panel):
 #--PanelChart--------------------------------------------------------------------
     def _drawFG(self, dc):
         """ Draw the front ground data distribution chart line."""
-        item = ((self.labelInfo[0], (200, 0, 0)),       # red
-                (self.labelInfo[1], (82, 153, 85)),     # green 
-                (self.labelInfo[2], (0, 0, 200)),       # blue 
-                (self.labelInfo[3], (0, 0, 0))    # black
-                )
-        gdc = None
-        if gv.iLineStyle == 3: gdc = wx.GCDC(dc) # can only have one gdc.
-        # Draw the charts.
-        y = self.appSize[1] - 75
-        for idx, data in enumerate(self.dataD):
-            (label, color) = item[idx] if self.dataSetNum != 1 else item[-1]
-            # Draw the line sample.
+        colorSet, y = ((200, 0, 0), (82, 153, 85), (0, 0, 200),
+                       (120, 120, 120)), self.appSize[1] - 75 
+        # Draw the label.
+        for idx, label in enumerate(self.labelInfo):
+            color = colorSet[idx]
             dc.SetPen(wx.Pen(color, width=gv.iLineStyle, style=wx.PENSTYLE_SOLID))
             dc.SetBrush(wx.Brush(wx.Colour(color)))
             dc.DrawText(label, idx*200+150, y+10)
             dc.DrawRectangle(120+idx*200, y, 20, 6)
+        gdc = wx.GCDC(dc) if gv.iLineStyle == 3 else None # can only have one gdc.
+        # Draw the charts.
+        for idx, data in enumerate(self.dataD):
+            color = colorSet[idx] if self.dataSetNum != 1 else colorSet[-1]
+            dc.SetPen(wx.Pen(color, width=gv.iLineStyle, style=wx.PENSTYLE_SOLID))
+            # Draw the line sample.
             if self.dataSetNum != 1 and idx < self.dataSetNum -1:
                 if gv.iLineStyle != 3:
                     dc.DrawSpline(self._buildSplinePtList(data, idx)) # slightly shift idx.
                 else:
-                    r, g, b = color # half transparent alph
-                    alph = 128
+                    (r, g, b),  alph = color, 128 # half transparent alph
                     gdc.SetBrush(wx.Brush(wx.Colour(r, g, b, alph)))
                     gdc.DrawPolygon(self._buildSplinePtList(data, idx))
             elif self.compareOverlay or self.dataSetNum == 1:
