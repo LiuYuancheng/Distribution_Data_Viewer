@@ -253,7 +253,7 @@ class distributionViewFrame(wx.Frame):
         hbox2.Add(self.lineStyleCB, flag=flagsR, border=2)
         hbox2.AddSpacer(10)
         self.SampleRCH0 = wx.ComboBox(
-            self, -1, choices=['Sample Count: '+str((i+1)*10) for i in range(10)], style=wx.CB_READONLY)
+            self, -1, choices=['Sample Count: '+str((i+1)*10) for i in range(9)]+['Sample Auto'], style=wx.CB_READONLY)
         self.SampleRCH0.Bind(wx.EVT_COMBOBOX, self.onChangeSR)
         self.SampleRCH0.SetSelection(2)
         hbox2.Add(self.SampleRCH0, flag=flagsR, border=2)
