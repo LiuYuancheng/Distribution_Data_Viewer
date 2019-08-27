@@ -11,10 +11,10 @@
 | Type 2: Disk Seek Delay                                      |
 | Type 3: Disk Read Delay                                      |
 | Type 4: Client Observed Delay                                |
-| Type 5: Input/Output Delay (Type 2 + Type 3)                 |
+| Type 5: Input+Output Delay (Type 2 + Type 3)                 |
 
 ---
-###### User interface and display mode: 
+###### User Interface and Display Mode: 
 
 The distribution data viewer has 2 display mode: **Parallel display mode** and  **Compare display mode**
 
@@ -36,9 +36,7 @@ pip install -U wxPython
 
 This is the cmd to install 
 
-[numpy]: https://pypi.org/project/numpy/
-
-[ ] :
+[numpy]: https://pypi.org/project/numpy/:
 
 ```
 pip install numpy
@@ -48,6 +46,17 @@ pip install numpy
 
 To run the program, go/cd to the src folder and run the "distributionViewer.py" program by:
 
+```
 python distributionViewer.py
+```
 
-The tested data CSV files are in the 'data' and 'model' folder.
+The tested data CSV files are in the 'data' and 'model' folder, the folder structure should be:
+
+![]()
+
+------
+
+###### Program Setup
+
+
+
