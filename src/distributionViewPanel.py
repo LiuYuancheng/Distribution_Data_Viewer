@@ -258,7 +258,8 @@ class PanelSetting(wx.Panel):
         gv.iDataMgr.setPanelData(csvFtag)
         # Force update the display panel.
         if self.mode == 0 and gv.iChartPanel0:
-            gv.iChartPanel0.updateDisplay()
+            pass
+            #gv.iChartPanel0.updateDisplay()
         elif gv.iChartPanel1:
             gv.iChartPanel1.updateDisplay()
         gv.iMainFame.infoWinClose(None)

@@ -43,7 +43,7 @@ class distributionViewFrame(wx.Frame):
         gv.iMainFame = self
         self.sampleCount = SAMPLE_COUNT
         self.infoWindow = None  # popup window to do the setting.
-        self.updateLock = False # lock the main program update.
+        self.updateLock = True # lock the main program update.
         self.synAdjust = True   # Synchronize adjustment on 2 display panels.
         self.displayChoice = \
             ('Type 0: Timestamping Delay',
@@ -131,6 +131,7 @@ class distributionViewFrame(wx.Frame):
             dataPanel, -1, choices=self.displayChoice, style=wx.CB_READONLY)
         self.chartTypeCH1.Bind(wx.EVT_COMBOBOX, self.onChangeDCT)
         self.chartTypeCH1.SetSelection(gv.iDataType)
+        self.chartTypeCH1.Enable(False)
         hbox1.Add(self.chartTypeCH1, flag=flagsR, border=2)
         hbox1.AddSpacer(10)
         self.disModeDCB =  wx.ComboBox(
@@ -219,12 +220,14 @@ class distributionViewFrame(wx.Frame):
             self, -1, choices=self.displayChoice, style=wx.CB_READONLY)
         self.chartTypeCH1.Bind(wx.EVT_COMBOBOX, self.onChangeDCT)
         self.chartTypeCH1.SetSelection(gv.iDataType)
+        self.chartTypeCH1.Enable(False)
         hbox1.Add(self.chartTypeCH1, flag=flagsR, border=2)
         hbox1.AddSpacer(10)
         self.disModeDCB =  wx.ComboBox(
             self, -1, choices=choice, style=wx.CB_READONLY)
         self.disModeDCB .SetSelection(0)
         self.disModeDCB.Bind(wx.EVT_COMBOBOX, self.onChangeYS)
+        self.disModeDCB.Enable(False)
         hbox1.Add(self.disModeDCB, flag=flagsR, border=2)
         hbox1.AddSpacer(10)
         self.pauseBt = wx.Button(
