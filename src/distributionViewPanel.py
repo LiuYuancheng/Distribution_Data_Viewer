@@ -197,11 +197,11 @@ class PanelSetting(wx.Panel):
         wx.Panel.__init__(self, parent, size=(620, 250))
         self.mode = mode
         self.SetBackgroundColour(wx.Colour(200, 200, 210))
-        self.SetSizer(self.buidUISizer())
+        self.SetSizer(self._buidUISizer())
         self.setCellVals()
 
 #--PanelSetting----------------------------------------------------------------
-    def buidUISizer(self):
+    def _buidUISizer(self):
         """ Build the Panel UI"""
         sizer = wx.BoxSizer(wx.VERTICAL)
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
@@ -254,6 +254,13 @@ class PanelSetting(wx.Panel):
 #--PanelSetting----------------------------------------------------------------
     def onStartExp(self, event):
         """ Start the experiment."""
+        csvFtag = 'M'if self.mode == 0 else 'D'
+        gv.iDataMgr.setPanelData(csvFtag)
+        # Force update the display panel.
+        if self.mode == 0 and gv.iChartPanel0:
+            gv.iChartPanel0.updateDisplay()
+        elif gv.iChartPanel1:
+            gv.iChartPanel1.updateDisplay()
         gv.iMainFame.infoWinClose(None)
         #gv.iMainFame.onStartExp(self.mode)
 
@@ -269,12 +276,14 @@ class PanelSetting(wx.Panel):
                     data[2]+':'+data[3]+' '+data[4]+' '+data[5]+'\n'
                 fh.write(line)
                 fh.write('sleep1\n\n')
-        
+        # Show the process bar increase. 
         waitT = 0.2 if self.mode == 0 else 0.1
         for i in range(1,11):
             self.processDisplay.SetValue(i)
             time.sleep(waitT)
-
+        # Load CSV tag
+        csvFtag = 'M'if self.mode == 0 else 'D'
+        gv.iDataMgr.loadCSVData(csvFtag)
         self.fetchBt.SetLabel("Finished")    
         self.fetchBt.Enable(True)
 
@@ -286,5 +295,69 @@ class PanelSetting(wx.Panel):
             for cIdx, data in enumerate(item):
                 self.grid.SetCellValue(rIdx, cIdx, data)
 
+#-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+class PanelCPResult(wx.Panel):
+    """ Show the experiment compare result.
+    """
+    def __init__(self, parent):
+        """ Init the panel."""
+        wx.Panel.__init__(self, parent, size=(500, 420))
+        self.SetBackgroundColour(wx.Colour(200, 200, 210))
+        self.SetSizer(self._buidUISizer())
+        self.Layout()
+    
+    def _buidUISizer(self):
+        """ Build the Panel UI"""
+        sizer = wx.BoxSizer(wx.VERTICAL)
+        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        sizer.Add(wx.StaticText(
+            self, label=" Data Comparasion Control"), flag=flagsR, border=2)
+        sizer.AddSpacer(10)
+        self.cpModeCH0 = wx.ComboBox(
+            self, -1, choices=['Compare Method: ROC'], style=wx.CB_READONLY)
+        self.cpModeCH0.SetSelection(0)
+        sizer.Add(self.cpModeCH0, flag=flagsR, border=2)
+        sizer.AddSpacer(10)
+        self.cpBaseCH = wx.ComboBox(
+            self, -1, choices=['Compare Base: None', 'Compare Base: exp-data.csv'], style=wx.CB_READONLY)
+        self.cpBaseCH.SetSelection(0)
+        sizer.Add(self.cpBaseCH, flag=flagsR, border=2)
+        sizer.AddSpacer(10)
+        self.dataTLb = wx.StaticText(self, label=" Data Type: Type 5: Input/Output Delay (Type 2 + Type 3)")
+        sizer.Add(self.dataTLb, flag=flagsR, border=2)
+        sizer.AddSpacer(10)
+        sizer.Add(wx.StaticText(
+            self, label=" Data Comparasion Result"), flag=flagsR, border=2)
+        sizer.AddSpacer(10)
+        self.grid = wx.grid.Grid(self, -1)
+        self.grid.CreateGrid(8, 3)
+        self.grid.SetRowLabelSize(180)
+        self.grid.SetColSize(0, 100)
+        self.grid.SetColSize(1, 100)
+        self.grid.SetColSize(2, 100)
 
+        self.grid.SetColLabelValue(0, 'exp-localHost')
+        self.grid.SetColLabelValue(1, 'exp-netStorage')
+        self.grid.SetColLabelValue(2, 'exp-remHost')
 
+        self.grid.SetRowLabelValue(0, 'Minimum Threshold')
+        self.grid.SetRowLabelValue(1, 'Maximum Threshold')
+        self.grid.SetRowLabelValue(2, 'True Positive')
+        self.grid.SetRowLabelValue(3, 'True Negative')
+        self.grid.SetRowLabelValue(4, 'False Positive')
+        self.grid.SetRowLabelValue(5, 'False Negative')
+        self.grid.SetRowLabelValue(6, 'Sensitivity: tp/(tp+fn) ')
+        self.grid.SetRowLabelValue(7, 'Specifity: tn/(tn+fp)')
+        sizer.Add(self.grid, flag=flagsR, border=2)
+        sizer.AddSpacer(10)
+        self.bestFTLb = wx.StaticText(self, label="Best Fit Data Set: None")
+        sizer.Add(self.bestFTLb, flag=flagsR, border=2)
+        sizer.AddSpacer(10)
+        self.restBt = wx.Button(self, label='Reset all to defualt', style=wx.BU_LEFT, size=(200, 23))
+        sizer.Add(self.restBt, flag=flagsR, border=2)
+        sizer.AddSpacer(10)
+        self.loadtoPanel = wx.Button(self, label='Load to compare panel', style=wx.BU_LEFT, size=(200, 23))
+        sizer.Add(self.loadtoPanel, flag=flagsR, border=2)
+
+        return sizer

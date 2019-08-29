@@ -63,7 +63,7 @@ class distributionViewFrame(wx.Frame):
         uiSizer = self.buildUISizerCpmode() if gv.iCPMode else self.buildUISizerNlmode()
         self.SetSizer(uiSizer)
         # The csv data manager.
-        self.dataMgr = distributionDataMgr(self)
+        gv.iDataMgr = self.dataMgr = distributionDataMgr(self)
         # Init the thread to call experiment program.
         self.expThread = btcRun.commThread(1, "Thread-1", 1)
         # Init the periodic timer.
@@ -165,7 +165,6 @@ class distributionViewFrame(wx.Frame):
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         width, _ = wx.GetDisplaySize()
         appSize = (width, 700) if width == 1920 else (1600, 700)
-        width = 1200
         sizer = wx.BoxSizer(wx.VERTICAL) # main frame sizer.
         # Row idx 0: [model] experiment display selection.
         hbox0 = wx.BoxSizer(wx.HORIZONTAL)
@@ -189,8 +188,20 @@ class distributionViewFrame(wx.Frame):
         hbox0.Add(self.disModeMCB, flag=flagsR, border=2)
         sizer.Add(hbox0, flag=flagsR, border=2)
         # Row idx 1: display panel for the model.
-        gv.iChartPanel0 = dvp.PanelChart( self, 4, appSize=(width, 430), recNum=self.sampleCount)
-        sizer.Add(gv.iChartPanel0, flag=flagsR, border=2)
+        
+        box01 = wx.BoxSizer(wx.HORIZONTAL)
+        gv.iChartPanel0 = dvp.PanelChart( self, 4, appSize=(1200, 430), recNum=self.sampleCount)
+        box01.Add(gv.iChartPanel0, flag=flagsR, border=2)
+
+        box01.AddSpacer(10)
+        box01.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 430),
+                                style=wx.LI_VERTICAL), flag=flagsR, border=2)
+        box01.AddSpacer(10)
+        self.comparePnl = dvp.PanelCPResult(self)
+        box01.Add(self.comparePnl, flag=flagsR, border=2)
+        sizer.Add(box01, flag=flagsR, border=2)
+
+
         sizer.AddSpacer(2)
         sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
@@ -222,7 +233,7 @@ class distributionViewFrame(wx.Frame):
         hbox1.Add(self.pauseBt, flag=flagsR, border=2)
         sizer.Add(hbox1, flag=flagsR, border=2)
         # Row idx 3: display panel for the model.
-        gv.iChartPanel1 =  dvp.PanelChart(self, 1, appSize=(width, 430), recNum=self.sampleCount)
+        gv.iChartPanel1 =  dvp.PanelChart(self, 1, appSize=(1200, 430), recNum=self.sampleCount)
         sizer.Add(gv.iChartPanel1, flag=flagsR, border=2)
         sizer.AddSpacer(2)
         sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
@@ -437,11 +448,11 @@ class distributionDataMgr(object):
         self.modelD = []    # mode folder data set.
         self.dataD = []     # data folder data set.
         print("DistributionDataMgr: Loading data.")
-        self.loadCSVData('M')   # load data from model folder.
-        self.loadCSVData('D')   # load data from data folder.
-        print("DistributionDataMgr: Set data for display.")
-        self.setPanelData('M')
-        self.setPanelData('D')
+        #self.loadCSVData('M')   # load data from model folder.
+        #self.loadCSVData('D')   # load data from data folder.
+        #print("DistributionDataMgr: Set data for display.")
+        #self.setPanelData('M')
+        #self.setPanelData('D')
     
 #--distributionDataMgr---------------------------------------------------------
     def getDataPercentile(self, setTag):
