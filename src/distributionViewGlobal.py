@@ -27,14 +27,19 @@ MODE_F_PATH = "".join([dirpath, "\\model\\*.csv"]) if WINP else "".join([dirpath
 DATA_F_PATH = "".join([dirpath, "\\data\\*.csv"]) if WINP else "".join([dirpath, "/data/*.csv"])
 # The config file for the netfetcher program.
 CONFIG_FILE = ("model_scripted_exp.bat", "check_scripted_exp.bat")
-
+# The experiment config data.
+# Format: [IP Address, Port Num, File ID, Block Num, Iterations, Output File]
+EXP_CONFIG = (('172.16.1.3', '5555', 'file_20180617.dat', '1024', '99999', 'exp-localHost.csv'),
+              ('172.16.1.3', '5555', 'file_20180617.dat','1024', '99999', 'exp-netStorage.csv'),
+              ('172.16.1.3', '5555', 'file_20180617.dat','1024', '99999', 'exp-remHost.csv'),
+              ('172.16.1.3', '5555', 'file_20180617.dat', '1024', '99999', 'exp-data.csv'),)
 #-------<GLOBAL PARAMTERS>-----------------------------------------------------
 iMainFame = None    # mail frame
 iDataMgr = None     # data manager.
 iChartPanel0 = None # history chart panel for module
 iChartPanel1 = None # history chart panel for data.
 iSetupPanel = None  # experiment setup panel.
-iCPMode = True      # compare mode flag.
+iCPMode = False      # compare mode flag.
 iModelType = 5      # Model Type currently displayed
 iDataType = 5       # Data Type currently displayed
 iUpdateRate = 2     # Time period to update the 

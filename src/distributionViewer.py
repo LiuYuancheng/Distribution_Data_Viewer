@@ -26,8 +26,8 @@ import distributionVieweBCRun as btcRun
 
 UPDATE_U = 1        # update time unit for test.
 PERIODIC = 500      # update in every 500ms
-SAMPLE_COUNT = 930  # how many sample at the Y-Axis
-DEF_SIZE = (1920, 680) if gv.iCPMode else (1920, 750)
+SAMPLE_COUNT = 760  # how many sample at the Y-Axis
+DEF_SIZE = (1920, 680) if gv.iCPMode else (1920, 1020)
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -165,6 +165,7 @@ class distributionViewFrame(wx.Frame):
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         width, _ = wx.GetDisplaySize()
         appSize = (width, 700) if width == 1920 else (1600, 700)
+        width = 1200
         sizer = wx.BoxSizer(wx.VERTICAL) # main frame sizer.
         # Row idx 0: [model] experiment display selection.
         hbox0 = wx.BoxSizer(wx.HORIZONTAL)
@@ -188,7 +189,7 @@ class distributionViewFrame(wx.Frame):
         hbox0.Add(self.disModeMCB, flag=flagsR, border=2)
         sizer.Add(hbox0, flag=flagsR, border=2)
         # Row idx 1: display panel for the model.
-        gv.iChartPanel0 = dvp.PanelChart( self, 4, appSize=(width, 290), recNum=self.sampleCount)
+        gv.iChartPanel0 = dvp.PanelChart( self, 4, appSize=(width, 430), recNum=self.sampleCount)
         sizer.Add(gv.iChartPanel0, flag=flagsR, border=2)
         sizer.AddSpacer(2)
         sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
@@ -221,7 +222,7 @@ class distributionViewFrame(wx.Frame):
         hbox1.Add(self.pauseBt, flag=flagsR, border=2)
         sizer.Add(hbox1, flag=flagsR, border=2)
         # Row idx 3: display panel for the model.
-        gv.iChartPanel1 =  dvp.PanelChart(self, 1, appSize=(width, 290), recNum=self.sampleCount)
+        gv.iChartPanel1 =  dvp.PanelChart(self, 1, appSize=(width, 430), recNum=self.sampleCount)
         sizer.Add(gv.iChartPanel1, flag=flagsR, border=2)
         sizer.AddSpacer(2)
         sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
@@ -273,7 +274,6 @@ class distributionViewFrame(wx.Frame):
         self.sycAdjustCB.Bind(wx.EVT_CHECKBOX, self.onChangeSyn)
         hbox2.Add(self.sycAdjustCB, flag=flagsR, border=2)
         return hbox2
-
 
 #--distributionViewFrame-------------------------------------------------------
     def infoWinClose(self, event):

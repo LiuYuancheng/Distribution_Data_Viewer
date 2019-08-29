@@ -1,3 +1,3 @@
-Run: 192.168.0.0:5555 test:128 100000 output.csv
+Run: 172.16.1.3:5555 file_20180617.dat:1024 99999 exp-data.csv
 sleep1
 

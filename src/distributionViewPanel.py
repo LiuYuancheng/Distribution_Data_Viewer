@@ -14,6 +14,7 @@
 #-----------------------------------------------------------------------------
 
 import wx
+import time
 import random
 import wx.grid
 import distributionViewGlobal as gv
@@ -46,17 +47,18 @@ class PanelChart(wx.Panel):
         self.logScaleShow = (1, 0, 1, 0, 0, 1, 0, 0, 1, 0) # 0 - hide, 1- show.
         self.labelInfo = ['Data1', 'Data2', 'Data3', 'exp-data[compare]']
         self.Bind(wx.EVT_PAINT, self.onPaint)
+        self.SetDoubleBuffered(True)
 
 #--PanelChart------------------------------------------------------------------     
     def _buildSplinePtList(self, data, idx):
         """ build the spline pixel points list based on the display mode."""
         recNum, deltY = int(self.recNum*1.0/self.percentileScale), self.appSize[1]//200
         if self.displayMode == 0:
-            return [(int(i*self.percentileScale+idx)*2, self._scaleCvrt(data[i])) for i in range(recNum)]
+            return [(int(i*self.percentileScale*1.5)+idx, self._scaleCvrt(data[i])) for i in range(recNum)]
         elif self.displayMode == 1:
-            return [(int(i*self.percentileScale+idx)*2, int(data[i])*200*deltY//self.maxCount) for i in range(recNum)]
+            return [(int(i*self.percentileScale*1.5)+idx, int(data[i])*200*deltY//self.maxCount) for i in range(recNum)]
         elif self.displayMode == 2:
-            return [(int(i*self.percentileScale+idx)*2, min(200*deltY, int(data[i])*deltY)) for i in range(recNum)]
+            return [(int(i*self.percentileScale*1.5)+idx, min(200*deltY, int(data[i])*deltY)) for i in range(recNum)]
 
 #--PanelChart------------------------------------------------------------------      
     def clearData(self):
@@ -76,7 +78,7 @@ class PanelChart(wx.Panel):
         dc.SetPen(wx.Pen('#D5D5D5'))  # dc.SetPen(wx.Pen('#0AB1FF'))
         # Draw the Y-Axis
         dc.DrawLine(1, 1, 1, y)
-        deltY = y//200*20 # <- don't replace by y//100*10 or y//10
+        deltY = int((y-90)//10) # <- don't replace by y//100*10 or y//10
         for i in range(1,11):
             dc.DrawLine(-5, i*deltY, x, i*deltY)  # Y-Grid
             if self.displayMode == 0:  # Logarithmic scale Y-Axis
@@ -90,10 +92,11 @@ class PanelChart(wx.Panel):
                 dc.DrawText(ylabel, -30, i*deltY+5)
         # Draw the X-Axis
         dc.DrawLine(1, 1, x, 1)
-        pixelU = int(20*self.percentileScale)
+        pixelU = int(15*self.percentileScale)
         for i in range(len(self.times)):
             dc.DrawLine(i*pixelU, -5, i*pixelU, deltY*10)  # X-Grid
-            dc.DrawText(str(self.times[i]).zfill(2), i*pixelU-5, -5)
+            if i % 5 == 0: 
+                dc.DrawText(str(self.times[i]).zfill(2), i*pixelU-5, -5)
 
 #--PanelChart--------------------------------------------------------------------
     def _drawFG(self, dc):
@@ -131,7 +134,7 @@ class PanelChart(wx.Panel):
 #--PanelChart------------------------------------------------------------------  
     def _scaleCvrt(self, n):
         """ Convert the data from liner scale Y-axis to Logarithmic scale Y-axis."""
-        deltY = self.appSize[1]//200*20
+        deltY = (self.appSize[1]-90)//10
         for idx, val in enumerate(self.logScale):
             if n <= val:
                 # Get the previous scale.
@@ -195,6 +198,7 @@ class PanelSetting(wx.Panel):
         self.mode = mode
         self.SetBackgroundColour(wx.Colour(200, 200, 210))
         self.SetSizer(self.buidUISizer())
+        self.setCellVals()
 
 #--PanelSetting----------------------------------------------------------------
     def buidUISizer(self):
@@ -236,10 +240,11 @@ class PanelSetting(wx.Panel):
         self.pauseBt.Bind(wx.EVT_BUTTON, self.onConstruct)
         hbox.Add(self.pauseBt, flag=flagsR, border=2)
         hbox.AddSpacer(10)
-        hbox.Add(wx.StaticText(self, label="--->"), flag=flagsR, border=2)
+        self.processDisplay = wx.Gauge(self, range=10, size=(350, 22), style=wx.GA_HORIZONTAL)
+        hbox.Add(self.processDisplay, flag=flagsR, border=2)
         hbox.AddSpacer(10)
         self.fetchBt = wx.Button(
-            self, label='BatchRun', style=wx.BU_LEFT, size=(100, 23))
+            self, label='Processing', style=wx.BU_LEFT, size=(100, 23))
         self.fetchBt.Bind(wx.EVT_BUTTON, self.onStartExp)
         hbox.Add(self.fetchBt, flag=flagsR, border=2)
         self.fetchBt.Enable(False)
@@ -249,7 +254,8 @@ class PanelSetting(wx.Panel):
 #--PanelSetting----------------------------------------------------------------
     def onStartExp(self, event):
         """ Start the experiment."""
-        gv.iMainFame.onStartExp(self.mode)
+        gv.iMainFame.infoWinClose(None)
+        #gv.iMainFame.onStartExp(self.mode)
 
 #--PanelSetting----------------------------------------------------------------
     def onConstruct(self, event):
@@ -263,4 +269,22 @@ class PanelSetting(wx.Panel):
                     data[2]+':'+data[3]+' '+data[4]+' '+data[5]+'\n'
                 fh.write(line)
                 fh.write('sleep1\n\n')
+        
+        waitT = 0.2 if self.mode == 0 else 0.1
+        for i in range(1,11):
+            self.processDisplay.SetValue(i)
+            time.sleep(waitT)
+
+        self.fetchBt.SetLabel("Finished")    
         self.fetchBt.Enable(True)
+
+#-----------------------------------------------------------------------------
+    def setCellVals(self):
+        """ Load the default value to the cells. """
+        dataList = gv.EXP_CONFIG[:3] if self.mode == 0 else [gv.EXP_CONFIG[-1]]
+        for rIdx, item in enumerate(dataList):
+            for cIdx, data in enumerate(item):
+                self.grid.SetCellValue(rIdx, cIdx, data)
+
+
+
