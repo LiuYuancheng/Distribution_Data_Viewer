@@ -330,9 +330,14 @@ class PanelCPResult(wx.Panel):
         self.dataTLb = wx.StaticText(self, label=" Data Type: Type 5: Input/Output Delay (Type 2 + Type 3)")
         sizer.Add(self.dataTLb, flag=flagsR, border=2)
         sizer.AddSpacer(10)
-        sizer.Add(wx.StaticText(
-            self, label=" Data Comparasion Result"), flag=flagsR, border=2)
-        sizer.AddSpacer(10)
+
+        hbox = wx.BoxSizer(wx.HORIZONTAL)
+        self.startBt = wx.Button(self, label='Start to match data.', style=wx.BU_LEFT, size=(180, 23))
+        self.startBt.Bind(wx.EVT_BUTTON, self.startMatch)
+        hbox.Add(self.startBt, flag=flagsR, border=2)
+        self.processDisplay = wx.Gauge(self, range=3, size=(415, 22), style=wx.GA_HORIZONTAL)
+        hbox.Add(self.processDisplay, flag=flagsR, border=2)
+        sizer.Add(hbox, flag=flagsR, border=2)
         self.grid = wx.grid.Grid(self, -1)
         self.grid.CreateGrid(8, 3)
         self.grid.SetRowLabelSize(180)
@@ -357,10 +362,10 @@ class PanelCPResult(wx.Panel):
         self.bestFTLb = wx.StaticText(self, label="Best Fit Data Set: None")
         sizer.Add(self.bestFTLb, flag=flagsR, border=2)
         sizer.AddSpacer(10)
-        self.restBt = wx.Button(self, label='Reset all to defualt', style=wx.BU_LEFT, size=(200, 23))
+        self.restBt = wx.Button(self, label='Reset all to defualt', style=wx.BU_LEFT, size=(180, 23))
         sizer.Add(self.restBt, flag=flagsR, border=2)
         sizer.AddSpacer(10)
-        self.loadtoPanelBt = wx.Button(self, label='Load to compare panel', style=wx.BU_LEFT, size=(200, 23))
+        self.loadtoPanelBt = wx.Button(self, label='Load to compare panel', style=wx.BU_LEFT, size=(180, 23))
         self.loadtoPanelBt.Bind(wx.EVT_BUTTON, self.loadtoPanel)
 
 
@@ -383,13 +388,20 @@ class PanelCPResult(wx.Panel):
             if val > 3:
                 idxF = idx
                 break
+        # only copy 420 sample to compare panel.
+        if len(gv.iChartPanel1.dataD[0]) - idxF < 420:
+            idxF = len(gv.iChartPanel1.dataD[0]) - 420
+        gv.iChartPanel3.compareOverlay = True
         gv.iChartPanel3.shiftOffset= idxF//10
-        gv.iChartPanel3.
+        gv.iChartPanel3.dataD[2] = gv.iChartPanel0.dataD[2][idxF:idxF+420]
+        gv.iChartPanel3.dataD[-1] = gv.iChartPanel1.dataD[0][idxF:idxF+420]
+        # make the end value to be 0
 
-
-
+        gv.iChartPanel3.dataD[2][0] = 0
+        gv.iChartPanel3.dataD[-1][0] = 0 
+        gv.iChartPanel3.dataD[2][-1] = 0
+        gv.iChartPanel3.dataD[-1][-1] = 0 
         gv.iChartPanel3.updateDisplay()
-
 
 #-----------------------------------------------------------------------------
     def fillInData(self, cIdx, dataSet):
@@ -397,3 +409,8 @@ class PanelCPResult(wx.Panel):
             print("The data set is invalid: %s" %str(dataSet))
         for rIdx in range(8):
             self.grid.SetCellValue(rIdx, cIdx, str(dataSet[rIdx]))
+    
+    def startMatch(self, event):
+        """ Set the data match flag. """
+        gv.iDataMgr.matchFlag = 0
+        self.processDisplay.SetValue(gv.iDataMgr.matchFlag)

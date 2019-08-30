@@ -258,7 +258,7 @@ class distributionViewFrame(wx.Frame):
                                 style=wx.LI_VERTICAL), flag=flagsR, border=2)
         box02.AddSpacer(10)
 
-        gv.iChartPanel3 = dvp.PanelChart(self, 1, appSize=(670, 430), recNum=self.sampleCount)
+        gv.iChartPanel3 = dvp.PanelChart(self, 4, appSize=(670, 430), recNum=420)
         
         box02.Add(gv.iChartPanel3, flag=flagsR, border=2)
 
@@ -336,10 +336,9 @@ class distributionViewFrame(wx.Frame):
     def reloadData(self, event):
         """ Reload data from the data folder and update the display"""
         print("Reload data from the data folder. ")
-        #self.dataMgr.loadCSVData('D')
-        #gv.iChartPanel1.updateDisplay()
-        self.dataMgr.matchFlag = 0
-
+        self.dataMgr.loadCSVData('D')
+        gv.iChartPanel1.updateDisplay()
+        
 #--distributionViewFrame-------------------------------------------------------
     def onChangeDCT(self, event):
         """ Change the data display check data type."""
@@ -507,6 +506,7 @@ class distributionDataMgr(object):
             filePaths = glob.glob(gv.MODE_F_PATH)
             self.modelD = []
             gv.iChartPanel0.setLabel(filePaths)
+            gv.iChartPanel3.setLabel(filePaths)
             rowTypeIdx = self.ModeChIdx
         else:
             filePaths = glob.glob(gv.DATA_F_PATH)
@@ -566,6 +566,7 @@ class distributionDataMgr(object):
             if 0 <= self.matchFlag <=2: 
                 self.matchData()
                 self.matchFlag += 1
+                gv.iMatchPanel.processDisplay.SetValue(self.matchFlag)
             else:
                 self.matchFlag = -1
             self.lastPeriodicTime = now
