@@ -44,4 +44,4 @@ iModelType = 5      # Model Type currently displayed
 iDataType = 5       # Data Type currently displayed
 iUpdateRate = 2     # Time period to update the 
 iLineStyle = 1      # width of the chart line
-
+iMatchFlag = False  # whether we do match function. 

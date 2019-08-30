@@ -302,7 +302,8 @@ class distributionViewFrame(wx.Frame):
     def periodic(self, event):
         """ Call back every periodic time."""
         if (not self.updateLock) and time.time() - self.lastPeriodicTime >= gv.iUpdateRate:
-            self.dataMgr.setPanelData('M')
+            #self.dataMgr.setPanelData('M')
+            self.dataMgr.periodic(time.time)
             gv.iChartPanel0.updateDisplay()
             self.lastPeriodicTime = time.time()
 
@@ -310,8 +311,9 @@ class distributionViewFrame(wx.Frame):
     def reloadData(self, event):
         """ Reload data from the data folder and update the display"""
         print("Reload data from the data folder. ")
-        self.dataMgr.loadCSVData('D')
-        gv.iChartPanel1.updateDisplay()
+        #self.dataMgr.loadCSVData('D')
+        #gv.iChartPanel1.updateDisplay()
+        self.dataMgr.matchFlag = 0
 
 #--distributionViewFrame-------------------------------------------------------
     def onChangeDCT(self, event):
@@ -450,6 +452,7 @@ class distributionDataMgr(object):
         self.DataChIdx = gv.iDataType
         self.modelD = []    # mode folder data set.
         self.dataD = []     # data folder data set.
+        self.matchFlag = -1
         print("DistributionDataMgr: Loading data.")
         #self.loadCSVData('M')   # load data from model folder.
         #self.loadCSVData('D')   # load data from data folder.
@@ -507,7 +510,7 @@ class distributionDataMgr(object):
         displayPanel.clearData()    # call the clearData to clear the panel record.
         for idx, dataSet in enumerate(dataList):
             for num in random.sample(dataSet, len(dataSet)*self.sampleRate//100):
-                if num//1000 > SAMPLE_COUNT: continue  # filter the too big data.
+                if num//1000 >= SAMPLE_COUNT: continue  # filter the too big data.
                 displayPanel.dataD[idx][num//1000] += 1
         # temperary for compare mode active. 
         if tag == 'M' and gv.iChartPanel0.compareOverlay:
@@ -528,7 +531,123 @@ class distributionDataMgr(object):
 #--distributionDataMgr---------------------------------------------------------
     def periodic(self, now):
         """ Call back every periodic time."""
-        self.setPanelData('M') # load 
+        self.setPanelData('M') # load
+        if 0 <= self.matchFlag <=2: 
+            self.matchData()
+            self.matchFlag += 1
+        else:
+            self.matchFlag = -1
+
+#--distributionDataMgr---------------------------------------------------------
+    def matchData(self):
+        """ match the data from Model list to Data list[0] to find the closest one.
+        """
+        recNum = len(self.dataD[0])*self.sampleRate//100
+        exp1_data = random.sample(self.modelD[self.matchFlag], recNum)
+        exp2_data = random.sample(self.dataD[0], recNum)    
+        exp1_data, exp2_data = self.dataCut(exp1_data, exp2_data)
+        min_bt, min_it, max_bt, max_it, tp, tn, fp, fn, thresh_list = self.learnClass(exp1_data, exp2_data)
+        print('Minimum Threshold: %s' %str(min_bt))
+        print('Maximum Threshold: %s' %str(max_bt))
+        print('True Positive: %s' %str(tp))
+        print('True Negative: %s' %str(tn))
+        print('False Positive: %s' %str(fp))
+        print('False Negative: %s' %str(fn))
+        print('Sensitivity: tp/(tp+fn) = %s' %str(tp/(tp+fn)))
+        print('Specifity: tn/(tn+fp) = %s' %str(tn/(tn+fp)))
+
+#-----------------------------------------------------------------------------
+    def learnClass(self, d1, d2,  resolution=100, verbose=False):
+        """ Get the relate COG different calcualtion result.
+        """
+        min_best_iter, max_best_iter, iteration = 1, 1, 1
+        moving_thresh, min_best_thresh, max_best_thresh = 0, 0, 0
+        the_thresh = [(0.0, 0.0, 0.0)]
+        # b_tp, b_tn, b_fp, b_fn = 0, 0, 0, 0
+        e1 = [(i, -1) for i in d1]
+        e2 = [(i, 1) for i in d2]
+        if np.mean(d1) > np.mean(d2): d1, d2 = d2, d1
+        b_tp = b_tn = 0
+        b_fp = b_fn = 1
+        best_sens = b_tp/(b_tp + b_fn)
+        best_spec = b_tn/(b_tn + b_fp)
+        lb = np.mean(d1)
+        ub = np.mean(d2)
+        steps = (ub - lb)/resolution
+        moving_thresh = min_best_thresh = max_best_thresh = lb
+        the_thresh.append((moving_thresh, min_best_thresh, max_best_thresh))
+        while(moving_thresh <= ub):
+            moving_thresh += steps
+            p1 = []
+            p2 = []
+            c_tp = c_tn = c_fp = c_fn = 0
+            for e in e1:
+                if e[0] < moving_thresh:
+                    p1.append(e)
+                else:
+                    p2.append(e)
+            # print 'Classifying second distribution.'
+            for e in e2:
+                if e[0] < moving_thresh:
+                    p1.append(e)
+                else:
+                    p2.append(e)
+
+            # print 'Evaluating negative class members.'
+            for p in p1:
+                if p[1] == -1:
+                    c_tn += 1
+                else:
+                    c_fn += 1
+            # print 'Evaluating positive class members.'
+            for p in p2:
+                if p[1] == 1:
+                    c_tp += 1
+                else:
+                    c_fp += 1
+            # print 'Comparing threashold fitness.'
+            cur_sens = c_tp/(c_tp + c_fn)
+            cur_spec = c_tn/(c_tn + c_fp)
+
+            ### HERE is the fitness metric
+            if (cur_sens > best_sens and cur_spec >= best_spec) or (cur_sens >= best_sens and cur_spec > best_spec):
+                min_best_thresh = moving_thresh
+                max_best_thresh = moving_thresh
+                the_thresh.append((moving_thresh, moving_thresh, moving_thresh))
+                min_best_iter = iteration
+                max_best_iter = iteration
+                b_tp, b_tn, b_fp, b_fn = c_tp, c_tn, c_fp, c_fn
+                best_sens = b_tp/(b_tp + b_fn)
+                best_spec = b_tn/(b_tn + b_fp)
+
+            elif cur_sens == best_sens and cur_spec == best_spec:
+                max_best_thresh = moving_thresh
+                max_best_iter = iteration
+                the_thresh.append((moving_thresh, min_best_thresh, moving_thresh))
+            else:
+                the_thresh.append(
+                    (moving_thresh, min_best_thresh, max_best_thresh))
+            iteration += 1
+        return min_best_thresh, min_best_iter, max_best_thresh, max_best_iter, b_tp, b_tn, b_fp, b_fn, the_thresh
+
+#-----------------------------------------------------------------------------
+    def dataCut(self, d1, d2):
+        """ Cuart the data set to positive and negative. """
+        c1, c2 = [], []
+        e1, e2 = np.array(d1), np.array(d2)
+        if e1.mean() > e2.mean():
+            e1, e2 = e2, e1
+        e1_mean = e1.mean()
+        e2_mean = e2.mean()
+        win = min(e1.std(), e2.std())
+        for e in e1:
+            if e > e1_mean - win and e < e2_mean + win:
+                c1.append(e)
+        for e in e2:
+            if e > e1_mean - win and e < e2_mean + win:
+                c2.append(e)
+        return c1, c2
+
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
