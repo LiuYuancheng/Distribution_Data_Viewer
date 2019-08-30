@@ -27,7 +27,7 @@ import distributionVieweBCRun as btcRun
 UPDATE_U = 1        # update time unit for test.
 PERIODIC = 500      # update in every 500ms
 SAMPLE_COUNT = 760  # how many sample at the Y-Axis
-DEF_SIZE = (1920, 680) if gv.iCPMode else (1920, 1020)
+DEF_SIZE = (1920, 680) if gv.iCPMode else (1920, 1040)
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -73,6 +73,7 @@ class distributionViewFrame(wx.Frame):
         self.timer.Start(PERIODIC)  # every 500 ms
         # Show the frame.
         self.SetDoubleBuffered(True)
+        self.Layout()
         self.Refresh(False)
 
 #--distributionViewFrame-------------------------------------------------------
@@ -167,6 +168,7 @@ class distributionViewFrame(wx.Frame):
         width, _ = wx.GetDisplaySize()
         appSize = (width, 700) if width == 1920 else (1600, 700)
         sizer = wx.BoxSizer(wx.VERTICAL) # main frame sizer.
+        sizer.AddSpacer(10)
         # Row idx 0: [model] experiment display selection.
         hbox0 = wx.BoxSizer(wx.HORIZONTAL)
         hbox0.Add(wx.Button(self, label='Data Source: [Model]', size=(
@@ -189,7 +191,11 @@ class distributionViewFrame(wx.Frame):
         hbox0.Add(self.disModeMCB, flag=flagsR, border=2)
         sizer.Add(hbox0, flag=flagsR, border=2)
         # Row idx 1: display panel for the model.
-        
+        sizer.AddSpacer(2)
+        sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
+                                style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        sizer.AddSpacer(2)
+
         box01 = wx.BoxSizer(wx.HORIZONTAL)
         gv.iChartPanel0 = dvp.PanelChart( self, 4, appSize=(1200, 430), recNum=self.sampleCount)
         box01.Add(gv.iChartPanel0, flag=flagsR, border=2)
@@ -198,8 +204,8 @@ class distributionViewFrame(wx.Frame):
         box01.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 430),
                                 style=wx.LI_VERTICAL), flag=flagsR, border=2)
         box01.AddSpacer(10)
-        self.comparePnl = dvp.PanelCPResult(self)
-        box01.Add(self.comparePnl, flag=flagsR, border=2)
+        gv.iMatchPanel = dvp.PanelCPResult(self)
+        box01.Add(gv.iMatchPanel, flag=flagsR, border=2)
         sizer.Add(box01, flag=flagsR, border=2)
 
 
@@ -235,9 +241,28 @@ class distributionViewFrame(wx.Frame):
         self.pauseBt.Bind(wx.EVT_BUTTON, self.reloadData)
         hbox1.Add(self.pauseBt, flag=flagsR, border=2)
         sizer.Add(hbox1, flag=flagsR, border=2)
+
+        sizer.AddSpacer(2)
+        sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
+                                style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
+        sizer.AddSpacer(2)
+
         # Row idx 3: display panel for the model.
-        gv.iChartPanel1 =  dvp.PanelChart(self, 1, appSize=(1200, 430), recNum=self.sampleCount)
-        sizer.Add(gv.iChartPanel1, flag=flagsR, border=2)
+        box02 = wx.BoxSizer(wx.HORIZONTAL)
+        gv.iChartPanel1 = dvp.PanelChart(self, 1, appSize=(1200, 430), recNum=self.sampleCount)
+        
+        box02.Add(gv.iChartPanel1, flag=flagsR, border=2)
+
+        box02.AddSpacer(10)
+        box02.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 430),
+                                style=wx.LI_VERTICAL), flag=flagsR, border=2)
+        box02.AddSpacer(10)
+
+        gv.iChartPanel3 = dvp.PanelChart(self, 1, appSize=(670, 430), recNum=self.sampleCount)
+        
+        box02.Add(gv.iChartPanel3, flag=flagsR, border=2)
+
+        sizer.Add(box02, flag=flagsR, border=2)
         sizer.AddSpacer(2)
         sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
@@ -303,7 +328,7 @@ class distributionViewFrame(wx.Frame):
         """ Call back every periodic time."""
         if (not self.updateLock) and time.time() - self.lastPeriodicTime >= gv.iUpdateRate:
             #self.dataMgr.setPanelData('M')
-            self.dataMgr.periodic(time.time)
+            self.dataMgr.periodic(time.time())
             gv.iChartPanel0.updateDisplay()
             self.lastPeriodicTime = time.time()
 
@@ -329,6 +354,7 @@ class distributionViewFrame(wx.Frame):
         if self.synAdjust:
             self.chartTypeCH1.SetSelection(self.chartTypeCH0.GetSelection())
             self.onChangeDCT(None)
+        gv.iMatchPanel.dataTLb.SetLabel(self.chartTypeCH0.GetValue())
 
 #--distributionViewFrame-------------------------------------------------------
     def onChangeFont(self, event):
@@ -459,6 +485,7 @@ class distributionDataMgr(object):
         #print("DistributionDataMgr: Set data for display.")
         #self.setPanelData('M')
         #self.setPanelData('D')
+        self.lastPeriodicTime = time.time()
     
 #--distributionDataMgr---------------------------------------------------------
     def getDataPercentile(self, setTag):
@@ -512,6 +539,9 @@ class distributionDataMgr(object):
             for num in random.sample(dataSet, len(dataSet)*self.sampleRate//100):
                 if num//1000 >= SAMPLE_COUNT: continue  # filter the too big data.
                 displayPanel.dataD[idx][num//1000] += 1
+            displayPanel.dataD[idx][1] = displayPanel.dataD[idx][0]
+            displayPanel.dataD[idx][0] = 0
+            displayPanel.dataD[idx][-1] = 0 
         # temperary for compare mode active. 
         if tag == 'M' and gv.iChartPanel0.compareOverlay:
             displayPanel.dataD[-1] = gv.iChartPanel1.dataD[0]
@@ -532,11 +562,13 @@ class distributionDataMgr(object):
     def periodic(self, now):
         """ Call back every periodic time."""
         self.setPanelData('M') # load
-        if 0 <= self.matchFlag <=2: 
-            self.matchData()
-            self.matchFlag += 1
-        else:
-            self.matchFlag = -1
+        if now - self.lastPeriodicTime >= 4:
+            if 0 <= self.matchFlag <=2: 
+                self.matchData()
+                self.matchFlag += 1
+            else:
+                self.matchFlag = -1
+            self.lastPeriodicTime = now
 
 #--distributionDataMgr---------------------------------------------------------
     def matchData(self):
@@ -555,6 +587,8 @@ class distributionDataMgr(object):
         print('False Negative: %s' %str(fn))
         print('Sensitivity: tp/(tp+fn) = %s' %str(tp/(tp+fn)))
         print('Specifity: tn/(tn+fp) = %s' %str(tn/(tn+fp)))
+        # Set the display panel:
+        gv.iMatchPanel.fillInData(self.matchFlag, (min_bt, max_bt, tp, tn, fp, fn, tp/(tp+fn), tn/(tn+fp) ) )
 
 #-----------------------------------------------------------------------------
     def learnClass(self, d1, d2,  resolution=100, verbose=False):

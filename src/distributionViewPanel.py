@@ -35,6 +35,7 @@ class PanelChart(wx.Panel):
         self.dataSetNum = dataSetNum    # how many charts.
         self.dataD = [[0]*recNum for _ in range(dataSetNum)]
         self.textFont = None    # Panel text font.
+        self.shiftOffset = 0    # number of shift on the x-Axis.
         # Above line can not use [[0]*num]*num, otherwise change one element 
         # all column will be change, the explaination is here: 
         # https://stackoverflow.com/questions/2739552/2d-list-has-weird-behavor-when-trying-to-modify-a-single-value
@@ -96,7 +97,7 @@ class PanelChart(wx.Panel):
         for i in range(len(self.times)):
             dc.DrawLine(i*pixelU, -5, i*pixelU, deltY*10)  # X-Grid
             if i % 5 == 0: 
-                dc.DrawText(str(self.times[i]).zfill(2), i*pixelU-5, -5)
+                dc.DrawText(str(self.times[i]+self.shiftOffset).zfill(2), i*pixelU-5, -5)
 
 #--PanelChart--------------------------------------------------------------------
     def _drawFG(self, dc):
@@ -303,11 +304,12 @@ class PanelCPResult(wx.Panel):
     """
     def __init__(self, parent):
         """ Init the panel."""
-        wx.Panel.__init__(self, parent, size=(500, 420))
-        self.SetBackgroundColour(wx.Colour(200, 200, 210))
+        wx.Panel.__init__(self, parent, size=(620, 420))
+        self.SetBackgroundColour(wx.Colour(200, 210, 200))
         self.SetSizer(self._buidUISizer())
         self.Layout()
-    
+
+#-----------------------------------------------------------------------------
     def _buidUISizer(self):
         """ Build the Panel UI"""
         sizer = wx.BoxSizer(wx.VERTICAL)
@@ -334,9 +336,9 @@ class PanelCPResult(wx.Panel):
         self.grid = wx.grid.Grid(self, -1)
         self.grid.CreateGrid(8, 3)
         self.grid.SetRowLabelSize(180)
-        self.grid.SetColSize(0, 100)
-        self.grid.SetColSize(1, 100)
-        self.grid.SetColSize(2, 100)
+        self.grid.SetColSize(0, 140)
+        self.grid.SetColSize(1, 140)
+        self.grid.SetColSize(2, 140)
 
         self.grid.SetColLabelValue(0, 'exp-localHost')
         self.grid.SetColLabelValue(1, 'exp-netStorage')
@@ -358,7 +360,40 @@ class PanelCPResult(wx.Panel):
         self.restBt = wx.Button(self, label='Reset all to defualt', style=wx.BU_LEFT, size=(200, 23))
         sizer.Add(self.restBt, flag=flagsR, border=2)
         sizer.AddSpacer(10)
-        self.loadtoPanel = wx.Button(self, label='Load to compare panel', style=wx.BU_LEFT, size=(200, 23))
-        sizer.Add(self.loadtoPanel, flag=flagsR, border=2)
+        self.loadtoPanelBt = wx.Button(self, label='Load to compare panel', style=wx.BU_LEFT, size=(200, 23))
+        self.loadtoPanelBt.Bind(wx.EVT_BUTTON, self.loadtoPanel)
 
+
+        sizer.Add(self.loadtoPanelBt, flag=flagsR, border=2)
         return sizer
+
+#-----------------------------------------------------------------------------
+    def clearAll(self):
+        """ clearAll the data in the grid. """
+        for cIdx in range(3):
+            for rIdx in range(8):
+                self.grid.SetCellValue(rIdx, cIdx, '')
+
+#-----------------------------------------------------------------------------
+    def loadtoPanel(self, event):
+        """ load the compare data to the control panel.
+        """
+        idxF = 0 
+        for idx, val in enumerate(gv.iChartPanel1.dataD[0]):
+            if val > 3:
+                idxF = idx
+                break
+        gv.iChartPanel3.shiftOffset= idxF//10
+        gv.iChartPanel3.
+
+
+
+        gv.iChartPanel3.updateDisplay()
+
+
+#-----------------------------------------------------------------------------
+    def fillInData(self, cIdx, dataSet):
+        if len(dataSet) != 8:
+            print("The data set is invalid: %s" %str(dataSet))
+        for rIdx in range(8):
+            self.grid.SetCellValue(rIdx, cIdx, str(dataSet[rIdx]))
