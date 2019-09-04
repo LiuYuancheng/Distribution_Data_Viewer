@@ -1,12 +1,12 @@
 # Distribution_Data_Viewer
 
-##### This project will create a distribution data viewer to show the experiment result of the netFetcher.(Load all the experiment CSV file and create the distribution curve.)
+##### This project will create a distribution data viewer to show the experiment result of the netFetcher. The netFetcher will record different kinds of delay when loading big files(such as the Ubuntu ISO img ) from different servers. The distribution viewer will load all the experiment CSV files and create the related distribution curves. The distribution viewer program will also provide a comparison function to find the best match data and display the compare result. 
 
- 
+![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/readMe0.png)
 
-| The data viewer will show 6types of file transfer delay data which collected by the netFetcher program: |
+| The data viewer will show 6 types of file transfer delay data which collected by the netFetcher program: |
 | ------------------------------------------------------------ |
-| Type 0: Timestamping Delay                                   |
+| Type 0: Timestamping Delay [Time clock delay/difference between server and client.] |
 | Type 1: Preprocessing Delay                                  |
 | Type 2: Disk Seek Delay                                      |
 | Type 3: Disk Read Delay                                      |
@@ -25,6 +25,14 @@ Parallel display mode:
 Compare display mode:
 
 ![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/2019-08-27_102419.png)
+
+------
+
+###### Project Development Evn: 
+
+Development environment: Python3.7/(Also tested under 2.7)
+
+Addition Lib: Wxpython, Numpy
 
 This is the cmd to install 
 
@@ -64,7 +72,7 @@ Data source title bar:
 
 ![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/2019-08-27_104832.png)
 
-=> User can select to display different type of data and the Y-Axis scale format. Currently we provide 3 kinds of Y-Axis scale: 
+=> User can select display different type of data and the Y-Axis scale format. Currently we provide 3 kinds of Y-Axis scale: 
 
 | Y-Axis scale type       | Scale range               | Data covered               |
 | ----------------------- | ------------------------- | -------------------------- |
@@ -80,7 +88,7 @@ Press the "Setup" button the setup window will pop up:
 
 ![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/setup.png)
 
-=> Fill in the data and click the "Calibration" button then the related netFetcher execution configuration *.bat file will be created, then press the "BatchRun" button the netFetcher program will be executed and the related data will be put in "Model" and "data" folder.
+=> Fill in the data and click the "Calibration" button, then the related netFetcher execution configuration *.bat file will be created, then press the "BatchRun" button the netFetcher program will be executed and the related data will be put in "Model" and "data" folder.
 
 Click the "compare mode" check box, both the [Model] and [data] data will be drawn on the Model display panel: 
 
@@ -101,3 +109,24 @@ Press the "Font Selection" button the font change window will pop-up:
 ![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/2019-08-27_104908.png)
 
 Check the "Synchronized Adjust" check box the [model] and [data] display will show the same change when user change one of the data display selection setting. 
+
+------
+
+###### Find The Best Match Data: 
+
+This is the data comparison control panel used to find the best match data: 
+
+![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/readMe2.png)
+
+**Step 1**: In the data comparison control panel, select the compare method: (Currently only have one compare method which compare 2 curve's ROC )
+
+ROC compare doc link: https://ncss-wpengine.netdna-ssl.com/wp-content/themes/ncss/pdf/Procedures/NCSS/Comparing_Two_ROC_Curves-Paired_Design.pdf
+
+**Step 2**: Select the compare base data from the drop down menu.
+
+**Step 3**: Click the "Start to match data" button, the program will start to calculate the data's ROC and find the best sensitivity data. 
+
+**Step 4**: Click the "Load to compare panel"  button, the best match data and the compare base data will be plot on the compare panel as shown below: 
+
+![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/readMe3.png)
+
