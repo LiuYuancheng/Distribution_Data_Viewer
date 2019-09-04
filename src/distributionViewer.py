@@ -566,7 +566,7 @@ class distributionDataMgr(object):
             if 0 <= self.matchFlag <=2: 
                 self.matchData()
                 self.matchFlag += 1
-                gv.iMatchPanel.processDisplay.SetValue(self.matchFlag)
+                gv.iMatchPanel.processDisplay.SetValue(self.matchFlag+1)
             else:
                 self.matchFlag = -1
             self.lastPeriodicTime = now

@@ -335,7 +335,7 @@ class PanelCPResult(wx.Panel):
         self.startBt = wx.Button(self, label='Start to match data.', style=wx.BU_LEFT, size=(180, 23))
         self.startBt.Bind(wx.EVT_BUTTON, self.startMatch)
         hbox.Add(self.startBt, flag=flagsR, border=2)
-        self.processDisplay = wx.Gauge(self, range=3, size=(415, 22), style=wx.GA_HORIZONTAL)
+        self.processDisplay = wx.Gauge(self, range=4, size=(415, 22), style=wx.GA_HORIZONTAL)
         hbox.Add(self.processDisplay, flag=flagsR, border=2)
         sizer.Add(hbox, flag=flagsR, border=2)
         self.grid = wx.grid.Grid(self, -1)
@@ -396,7 +396,6 @@ class PanelCPResult(wx.Panel):
         gv.iChartPanel3.dataD[2] = gv.iChartPanel0.dataD[2][idxF:idxF+420]
         gv.iChartPanel3.dataD[-1] = gv.iChartPanel1.dataD[0][idxF:idxF+420]
         # make the end value to be 0
-
         gv.iChartPanel3.dataD[2][0] = 0
         gv.iChartPanel3.dataD[-1][0] = 0 
         gv.iChartPanel3.dataD[2][-1] = 0
@@ -405,12 +404,16 @@ class PanelCPResult(wx.Panel):
 
 #-----------------------------------------------------------------------------
     def fillInData(self, cIdx, dataSet):
+        """ fill the matching result in the data. """
         if len(dataSet) != 8:
             print("The data set is invalid: %s" %str(dataSet))
         for rIdx in range(8):
             self.grid.SetCellValue(rIdx, cIdx, str(dataSet[rIdx]))
-    
+        if cIdx == 2:
+             self.bestFTLb.SetLabel("Best Fit Data Set: exp-remHost")
+
+#-----------------------------------------------------------------------------
     def startMatch(self, event):
         """ Set the data match flag. """
         gv.iDataMgr.matchFlag = 0
-        self.processDisplay.SetValue(gv.iDataMgr.matchFlag)
+        self.processDisplay.SetValue(gv.iDataMgr.matchFlag+1)
