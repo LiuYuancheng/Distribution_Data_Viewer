@@ -315,7 +315,7 @@ class PanelCPResult(wx.Panel):
         sizer = wx.BoxSizer(wx.VERTICAL)
         flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
         sizer.Add(wx.StaticText(
-            self, label=" Data Comparasion Control"), flag=flagsR, border=2)
+            self, label=" Data Comparision Control"), flag=flagsR, border=2)
         sizer.AddSpacer(10)
         self.cpModeCH0 = wx.ComboBox(
             self, -1, choices=['Compare Method: ROC'], style=wx.CB_READONLY)
