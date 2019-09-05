@@ -33,6 +33,7 @@ EXP_CONFIG = (('127.0.0.1', '5555', 'file_20180617.dat', '1024', '99999', 'exp-l
               ('172.16.1.3', '5555', 'file_20180617.dat','1024', '99999', 'exp-netStorage.csv'),
               ('172.16.1.2', '5555', 'file_20180617.dat','1024', '99999', 'exp-remHost.csv'),
               ('172.16.1.4', '5555', 'file_20180617.dat', '1024', '99999', 'exp-data.csv'),)
+              
 #-------<GLOBAL PARAMTERS>-----------------------------------------------------
 iMainFame = None    # mail frame
 iDataMgr = None     # data manager.
@@ -41,7 +42,7 @@ iChartPanel1 = None # history chart panel for data.
 iMatchPanel = None  # Data match panel.
 iChartPanel3 = None # compare panel for data and module.
 iSetupPanel = None  # experiment setup panel.
-iCPMode = False      # compare mode flag.
+iCPMode = False     # compare mode flag.
 iModelType = 5      # Model Type currently displayed
 iDataType = 5       # Data Type currently displayed
 iUpdateRate = 2     # Time period to update the 

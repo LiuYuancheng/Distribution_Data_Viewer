@@ -522,10 +522,8 @@ class distributionDataMgr(object):
                     i = int(
                         row[rowTypeIdx+1]) if rowTypeIdx < 5 else (int(row[3])+int(row[4]))
                     dataSet.append(i)
-            if tag == 'M':
-                self.modelD.append(dataSet)
-            else:
-                self.dataD.append(dataSet)
+            _ = self.modelD.append(dataSet) if tag == 'M'else self.dataD.append(dataSet)
+
 
 #--distributionDataMgr---------------------------------------------------------
     def setPanelData(self, tag):
@@ -573,12 +571,10 @@ class distributionDataMgr(object):
 
 #--distributionDataMgr---------------------------------------------------------
     def matchData(self):
-        """ match the data from Model list to Data list[0] to find the closest one.
-        """
+        """ match the data from Model list to Data list[0] to find the closest one."""
         recNum = len(self.dataD[0])*self.sampleRate//100
-        exp1_data = random.sample(self.modelD[self.matchFlag], recNum)
-        exp2_data = random.sample(self.dataD[0], recNum)    
-        exp1_data, exp2_data = self.dataCut(exp1_data, exp2_data)
+        exp1_data, exp2_data = self.dataCut(random.sample(self.modelD[self.matchFlag], recNum), 
+                                            random.sample(self.dataD[0], recNum))
         min_bt, min_it, max_bt, max_it, tp, tn, fp, fn, thresh_list = self.learnClass(exp1_data, exp2_data)
         print('Minimum Threshold: %s' %str(min_bt))
         print('Maximum Threshold: %s' %str(max_bt))
@@ -589,21 +585,19 @@ class distributionDataMgr(object):
         print('Sensitivity: tp/(tp+fn) = %s' %str(tp/(tp+fn)))
         print('Specifity: tn/(tn+fp) = %s' %str(tn/(tn+fp)))
         # Set the display panel:
-        gv.iMatchPanel.fillInData(self.matchFlag, (min_bt, max_bt, tp, tn, fp, fn, tp/(tp+fn), tn/(tn+fp) ) )
+        gv.iMatchPanel.fillInData(
+            self.matchFlag, (min_bt, max_bt, tp, tn, fp, fn, tp/(tp+fn), tn/(tn+fp)))
 
-#-----------------------------------------------------------------------------
+#--distributionDataMgr---------------------------------------------------------
     def learnClass(self, d1, d2,  resolution=100, verbose=False):
         """ Get the relate COG different calcualtion result.
         """
-        min_best_iter, max_best_iter, iteration = 1, 1, 1
-        moving_thresh, min_best_thresh, max_best_thresh = 0, 0, 0
+        min_best_iter = max_best_iter = iteration = b_fp = b_fn = 1
+        moving_thresh = min_best_thresh = max_best_thresh = b_tp = b_tn = 0
         the_thresh = [(0.0, 0.0, 0.0)]
-        # b_tp, b_tn, b_fp, b_fn = 0, 0, 0, 0
         e1 = [(i, -1) for i in d1]
         e2 = [(i, 1) for i in d2]
         if np.mean(d1) > np.mean(d2): d1, d2 = d2, d1
-        b_tp = b_tn = 0
-        b_fp = b_fn = 1
         best_sens = b_tp/(b_tp + b_fn)
         best_spec = b_tn/(b_tn + b_fp)
         lb = np.mean(d1)
@@ -617,17 +611,10 @@ class distributionDataMgr(object):
             p2 = []
             c_tp = c_tn = c_fp = c_fn = 0
             for e in e1:
-                if e[0] < moving_thresh:
-                    p1.append(e)
-                else:
-                    p2.append(e)
+                _ = p1.append(e) if e[0] < moving_thresh else p2.append(e)
             # print 'Classifying second distribution.'
             for e in e2:
-                if e[0] < moving_thresh:
-                    p1.append(e)
-                else:
-                    p2.append(e)
-
+                _ = p1.append(e) if e[0] < moving_thresh else p2.append(e)
             # print 'Evaluating negative class members.'
             for p in p1:
                 if p[1] == -1:
@@ -682,7 +669,6 @@ class distributionDataMgr(object):
             if e > e1_mean - win and e < e2_mean + win:
                 c2.append(e)
         return c1, c2
-
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
