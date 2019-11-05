@@ -14,17 +14,15 @@ import os, sys
 dirpath = os.getcwd()
 print("distributionViewerGlobal: Current working directory is : %s" %dirpath)
 
-WINP = sys.platform.startswith('win')
-
 #------<CONSTANTS>-------------------------------------------------------------
 # Application name and version. setting
 APP_NAME = 'NetFetcher Distribution Data Viewer'
 # Program title icon
-ICON_PATH = "".join([dirpath, "\\img\\title.png"]) if WINP else "".join([dirpath, "/img/title.png"])
+ICON_PATH = os.path.join(dirpath, 'img', 'title.png')
 # Module folder:
-MODE_F_PATH = "".join([dirpath, "\\model\\*.csv"]) if WINP else "".join([dirpath, "/model/*.csv"])
+MODE_F_PATH = os.path.join(dirpath, 'model', '*.csv')
 # Data folder:
-DATA_F_PATH = "".join([dirpath, "\\data\\*.csv"]) if WINP else "".join([dirpath, "/data/*.csv"])
+DATA_F_PATH = os.path.join(dirpath, 'data', '*.csv')
 # The config file for the netfetcher program.
 CONFIG_FILE = ("model_scripted_exp.bat", "check_scripted_exp.bat")
 # The experiment config data.
