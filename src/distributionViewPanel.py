@@ -171,7 +171,7 @@ class PanelChart(wx.Panel):
 #--PanelChart------------------------------------------------------------------  
     def setLabel(self, labelList):
         """ Set the chart color label. <labelList>: the list of the CSV file's path."""
-        splitChr = '\\' if gv.WINP else '/'
+        splitChr = '\\' #if gv.WINP else '/'
         for i in range(len(labelList)):
             self.labelInfo[i] = str(labelList[i].split(splitChr)[-1])[:-3]
 
@@ -205,7 +205,7 @@ class PanelSetting(wx.Panel):
     def _buidUISizer(self):
         """ Build the Panel UI"""
         sizer = wx.BoxSizer(wx.VERTICAL)
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        flagsR = wx.RIGHT  # wx.ALIGN_CENTER_VERTICAL
         sizer.AddSpacer(5)
         sizer.Add(wx.StaticText(
             self, label="Fill The Information In The Grid: "), flag=flagsR, border=2)
@@ -313,7 +313,7 @@ class PanelCPResult(wx.Panel):
     def _buidUISizer(self):
         """ Build the Panel UI"""
         sizer = wx.BoxSizer(wx.VERTICAL)
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        flagsR = wx.RIGHT  # wx.ALIGN_CENTER_VERTICAL
         sizer.Add(wx.StaticText(
             self, label=" Data Comparision Control"), flag=flagsR, border=2)
         sizer.AddSpacer(10)

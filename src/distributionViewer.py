@@ -2,17 +2,19 @@
 #-----------------------------------------------------------------------------
 # Name:        distributionViewer.py
 #
-# Purpose:     This module is used to read the data from serveral CSV files in 
-#              data/model folder and draw the distribution diagram.
+# Purpose:     This module is used to read the distrubuted data from serveral 
+#              CSV files in the data and model folder, the draw the data set 
+#              distribution diagram. It will also provide different function 
+#              to do the data comparison and calculation.
 #             
 # Author:      Yuancheng Liu
 #
 # Created:     2019/08/02
+# version:     v_0.2
 # Copyright:   NUS Singtel Cyber Security Research & Development Laboratory
 # License:     YC @ NUS
 #-----------------------------------------------------------------------------
 
-import io, sys
 import csv
 import time
 import glob
@@ -26,8 +28,8 @@ import distributionVieweBCRun as btcRun
 
 UPDATE_U = 1        # update time unit for test.
 PERIODIC = 500      # update in every 500ms
-SAMPLE_COUNT = 760  # how many sample at the Y-Axis
-DEF_SIZE = (1920, 680) if gv.iCPMode else (1920, 1040)
+SAMPLE_COUNT = 760  # max number of sample displayed in Y-Axis.
+DEF_SIZE = (1920, 680) if gv.iCPMode else (1920, 1040) 
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
@@ -43,8 +45,8 @@ class distributionViewFrame(wx.Frame):
         gv.iMainFame = self
         self.sampleCount = SAMPLE_COUNT
         self.infoWindow = None  # popup window to do the setting.
-        self.updateLock = True # lock the main program update.
-        self.synAdjust = True   # Synchronize adjustment on 2 display panels.
+        self.updateLock = True  # lock flag of main program update.
+        self.synAdjust = True   # synchronize adjustment on 2 display panels.
         self.displayChoice = \
             ('Type 0: Timestamping Delay',
              'Type 1: Preprocessing Delay',
@@ -78,8 +80,10 @@ class distributionViewFrame(wx.Frame):
 
 #--distributionViewFrame-------------------------------------------------------
     def buildUISizerCpmode(self):
-        """ Init the frame user interface and return the sizer.(Compare mode)"""
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        """ Init the frame user interface and return the sizer.(Compare mode, compare 
+            the model predic and the real dataset.)
+        """
+        flagsR = wx.RIGHT  # wx.ALIGN_CENTER_VERTICAL
         width, _ = wx.GetDisplaySize()
         sizer = wx.BoxSizer(wx.VERTICAL) # main frame sizer.
         # Row idx 0: [model] experiment display selection.
@@ -164,7 +168,7 @@ class distributionViewFrame(wx.Frame):
 #--distributionViewFrame-------------------------------------------------------
     def buildUISizerNlmode(self):
         """ Init the frame user interface and return the sizer.(Normal mode)"""
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        flagsR = wx.RIGHT  #wx.ALIGN_CENTER_VERTICAL
         width, _ = wx.GetDisplaySize()
         appSize = (width, 700) if width == 1920 else (1600, 700)
         sizer = wx.BoxSizer(wx.VERTICAL) # main frame sizer.
@@ -274,7 +278,7 @@ class distributionViewFrame(wx.Frame):
     def _buildUISizerSetting(self):
         """ Build the Setting UI sizer. 
         """
-        flagsR = wx.RIGHT | wx.ALIGN_CENTER_VERTICAL
+        flagsR = wx.RIGHT  # wx.ALIGN_CENTER_VERTICAL
         # Row dix 4: display setting
         hbox2 = wx.BoxSizer(wx.HORIZONTAL)
         hbox2.Add(wx.StaticText(

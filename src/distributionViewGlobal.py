@@ -6,13 +6,13 @@
 # Author:      Yuancheng Liu
 #
 # Created:     2019/08/01
+# version:     V_0.2
 # Copyright:   NUS-Singtel Cyber Security Research & Development Laboratory
 # License:     YC @ NUS
 #-----------------------------------------------------------------------------
 import os, sys
-
-dirpath = os.getcwd()
-print("distributionViewerGlobal: Current working directory is : %s" %dirpath)
+dirpath = os.path.dirname(__file__)
+print("Current source code location : %s" % dirpath)
 
 #------<CONSTANTS>-------------------------------------------------------------
 # Application name and version. setting
