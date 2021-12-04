@@ -1,30 +1,55 @@
 # Distribution_Data_Viewer
 
-##### This project will create a distribution data viewer to show the experiment result of the netFetcher. The netFetcher will record different kinds of delay when loading big files(such as the Ubuntu ISO img ) from different servers. The distribution viewer will load all the experiment CSV files and create the related distribution curves. The distribution viewer program will also provide a comparison function to find the best match data and display the compare result. 
+**Program Design Purpose**: We have collected some distribute delay(time interval) data when using the **[ omnibus](https://github.com/chef/omnibus)** netFetcher module to query big data from client computer from the server.  We want to visualized these different kinds of delay data, do graph comparison between the model prediction and real data with the receiver operating characteristic curve compare algorithm.
 
-![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/readMe0.png)
+
+
+### Introduction 
+
+This project will create a distribution data viewer to visualize the experiment result of the netFetcher. The netFetcher will record different kinds of delay when loading big files (such as the Ubuntu ISO img) from different servers. The distribution viewer will load all the experiment CSV files and create the related distribution curves. The distribution viewer program will also provide a comparison function to find the best match data and display the compare result with the receiver operating characteristic curve compare algorithm.
+
+
+
+###### Distribution Data Viewer Main UI
+
+The user can select **normal parallel display mode** and **compare overlay mode** by change the `iCPMod` flag in the globale file`distributionViewGlobal.py` . The compare mode Main UI is shown below:
+
+![](doc/distrubution_UI.gif)
+
+**Normal parallel display mode** will show the netFetcher module measured data at the top panel and show the the calculated data at the bottom panel:
+
+![](doc/normal_dis_mode.png)
+
+**Compare overlay mode** will overly the module measured data and self calculated data in one graph: 
+
+![](doc/compare_dis_mode.png)
+
+
+
+version: v_0.2
+
+
+
+
+
+
+
+
+
+
 
 | The data viewer will show 6 types of file transfer delay data which collected by the netFetcher program: |
 | ------------------------------------------------------------ |
 | Type 0: Timestamping Delay [Time clock delay/difference between server and client.] |
-| Type 1: Preprocessing Delay                                  |
-| Type 2: Disk Seek Delay                                      |
-| Type 3: Disk Read Delay                                      |
-| Type 4: Client Observed Delay                                |
-| Type 5: Input+Output Delay (Type 2 + Type 3)                 |
+| Type 1: Download Server Request Preprocessing Delay          |
+| Type 2: Download Server Disk Seek Delay                      |
+| Type 3: Download Server Disk Read Delay                      |
+| Type 4: Client Observed Delay (Time[get the download package] - Time[send the download request] ) |
+| Type 5:I/O+transfer Delay (Type 2 + Type 3 + Network delay)  |
 
----
-###### User Interface and Display Mode: 
 
-The distribution data viewer has 2 display mode: **Parallel display mode** and  **Compare display mode**
 
-Parallel display mode:
 
-![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/2019-08-27_102527.png)
-
-Compare display mode:
-
-![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/2019-08-27_102419.png)
 
 ------
 

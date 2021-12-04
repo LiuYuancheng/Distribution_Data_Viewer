@@ -167,7 +167,9 @@ class distributionViewFrame(wx.Frame):
 
 #--distributionViewFrame-------------------------------------------------------
     def buildUISizerNlmode(self):
-        """ Init the frame user interface and return the sizer.(Normal mode)"""
+        """ Init the frame user interface and return the sizer.(Normal mode, only 
+            show the model predic data.)
+        """
         flagsR = wx.RIGHT  #wx.ALIGN_CENTER_VERTICAL
         width, _ = wx.GetDisplaySize()
         appSize = (width, 700) if width == 1920 else (1600, 700)
