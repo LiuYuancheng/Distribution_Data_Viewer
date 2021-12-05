@@ -6,11 +6,11 @@
 
 ### Introduction 
 
-This project will create a distribution data viewer to visualize the experiment result of the netFetcher. The netFetcher will record different kinds of delay when loading big files (such as the Ubuntu ISO img) from different servers. The distribution viewer will load all the experiment CSV files and create the related distribution curves. The distribution viewer program will also provide a comparison function to find the best match data and display the compare result with the receiver operating characteristic curve compare algorithm.
+This project will create a distribution data viewer to visualize the experiment result of the netFetcher. The netFetcher will record different kinds of delay when loading big files (such as the Ubuntu ISO img) from different servers. The distribution viewer will load all the experiment CSV files and create the related distribution curves. The distribution viewer program will also provide a comparison function to find the best match data and display the compare result with the receiver operating characteristic(ROC) curve compare algorithm.
 
 
 
-###### Distribution Data Viewer Main UI
+#### Distribution Data Viewer Main UI
 
 The user can select **normal parallel display mode** and **compare overlay mode** by change the `iCPMod` flag in the globale file`distributionViewGlobal.py` . The compare mode Main UI is shown below:
 
@@ -28,15 +28,11 @@ The user can select **normal parallel display mode** and **compare overlay mode*
 
 version: v_0.2
 
+#### Program Main Function
 
+The main function of the Viewer 
 
-
-
-
-
-
-
-
+1. Visualize different kinds of delay data with different data sampling rate. 
 
 | The data viewer will show 6 types of file transfer delay data which collected by the netFetcher program: |
 | ------------------------------------------------------------ |
@@ -47,9 +43,10 @@ version: v_0.2
 | Type 4: Client Observed Delay (Time[get the download package] - Time[send the download request] ) |
 | Type 5:I/O+transfer Delay (Type 2 + Type 3 + Network delay)  |
 
+2. Dynamically update the data view, line style, percentile of data, font format. 
+3. Calculate the current model and measured data sample set's ROC comparison value for different three kinds of data set : `data minimum diference threshold` ,  `data maximum difference threshold` , `model match to measurement true positive rate` , `model match to measurement true negative rate` , `model match to measurement false positive rate`, `model match to measurement false negative rate`, `sensitivity [true positive/(true positive+false negative)]` , `specifity [true negative/(true negative + false positive)]`
 
-
-
+4. Show the overly graph comparison result. 
 
 ------
 

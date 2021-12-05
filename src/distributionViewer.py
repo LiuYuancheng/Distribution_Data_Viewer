@@ -67,7 +67,7 @@ class distributionViewFrame(wx.Frame):
         # The csv data manager.
         gv.iDataMgr = self.dataMgr = distributionDataMgr(self)
         # Init the thread to call experiment program.
-        self.expThread = btcRun.commThread(1, "Thread-1", 1)
+        # self.expThread = btcRun.commThread(1, "Thread-1", 1)
         # Init the periodic timer.
         self.lastPeriodicTime = time.time()
         self.timer = wx.Timer(self)
@@ -201,11 +201,9 @@ class distributionViewFrame(wx.Frame):
         sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
         sizer.AddSpacer(2)
-
         box01 = wx.BoxSizer(wx.HORIZONTAL)
         gv.iChartPanel0 = dvp.PanelChart( self, 4, appSize=(1200, 430), recNum=self.sampleCount)
         box01.Add(gv.iChartPanel0, flag=flagsR, border=2)
-
         box01.AddSpacer(10)
         box01.Add(wx.StaticLine(self, wx.ID_ANY, size=(-1, 430),
                                 style=wx.LI_VERTICAL), flag=flagsR, border=2)
@@ -213,8 +211,6 @@ class distributionViewFrame(wx.Frame):
         gv.iMatchPanel = dvp.PanelCPResult(self)
         box01.Add(gv.iMatchPanel, flag=flagsR, border=2)
         sizer.Add(box01, flag=flagsR, border=2)
-
-
         sizer.AddSpacer(2)
         sizer.Add(wx.StaticLine(self, wx.ID_ANY, size=(width, -1),
                                 style=wx.LI_HORIZONTAL), flag=flagsR, border=2)
@@ -256,7 +252,6 @@ class distributionViewFrame(wx.Frame):
         # Row idx 3: display panel for the model.
         box02 = wx.BoxSizer(wx.HORIZONTAL)
         gv.iChartPanel1 = dvp.PanelChart(self, 1, appSize=(1200, 430), recNum=self.sampleCount)
-        
         box02.Add(gv.iChartPanel1, flag=flagsR, border=2)
 
         box02.AddSpacer(10)
@@ -441,12 +436,6 @@ class distributionViewFrame(wx.Frame):
                     'Help', wx.OK)
 
 #--distributionViewFrame-------------------------------------------------------
-    def onStartExp(self, mode):
-        """ Run the experiment once."""
-        print("Start the experiment.")        
-        self.expThread.experimentStart()
-
-#--distributionViewFrame-------------------------------------------------------
     def onSetupModelExp(self, event):
         """ Pop-up the model experiment setup window. """
         if self.infoWindow is None and gv.iSetupPanel is None:
@@ -485,17 +474,12 @@ class distributionDataMgr(object):
         self.dataD = []     # data folder data set.
         self.matchFlag = -1
         print("DistributionDataMgr: Loading data.")
-        #self.loadCSVData('M')   # load data from model folder.
-        #self.loadCSVData('D')   # load data from data folder.
-        #print("DistributionDataMgr: Set data for display.")
-        #self.setPanelData('M')
-        #self.setPanelData('D')
         self.lastPeriodicTime = time.time()
     
 #--distributionDataMgr---------------------------------------------------------
     def getDataPercentile(self, setTag):
         """ Calculate the data pervertile value base on the input tag:
-            0 - 100%, 1- 99.9%
+            0 - 100%, 1 - 99.9%
         """
         self.percentile = 1 if setTag == 0 else np.percentile(self.dataD, 99.9)//1000
 
@@ -529,7 +513,6 @@ class distributionDataMgr(object):
                         row[rowTypeIdx+1]) if rowTypeIdx < 5 else (int(row[3])+int(row[4]))
                     dataSet.append(i)
             _ = self.modelD.append(dataSet) if tag == 'M'else self.dataD.append(dataSet)
-
 
 #--distributionDataMgr---------------------------------------------------------
     def setPanelData(self, tag):

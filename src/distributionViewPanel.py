@@ -15,15 +15,14 @@
 
 import wx
 import time
-import random
 import wx.grid
 import distributionViewGlobal as gv
 
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelChart(wx.Panel):
-    """ This function is used to provide lineChart wxPanel to show the all the 
-        data as distribution lines.
+    """ This function is used to provide lineChart wxPanel to show the input
+        sample data as distribution lines.
     """
     def __init__(self, parent, dataSetNum, appSize=(1600, 290), recNum=750):
         """ Init the panel."""
@@ -41,9 +40,9 @@ class PanelChart(wx.Panel):
         # https://stackoverflow.com/questions/2739552/2d-list-has-weird-behavor-when-trying-to-modify-a-single-value
         self.times = [n for n in range(self.recNum//10)]  # X-Axis(time delay).
         self.maxCount = 0       # max count of the delay in the current data set.
-        self.percentileScale = 1     # how many pixel scale will extend for x-Axis. 
-        self.compareOverlay = False # Overlay the compare data.(compare data save in <self.dataD[-1]>)
-        self.displayMode = 0 # 0 - Logarithmic scale, 1 - linear scale real, 2-linear scale fix
+        self.percentileScale = 1    # how many pixel scale will extend for x-Axis. 
+        self.compareOverlay = False # Overlay the compare data.(compare data save in <self.dataD[-1]> )
+        self.displayMode = 0        # 0 - Logarithmic scale, 1 - linear scale real, 2-linear scale fix
         self.logScale = (10, 50, 100, 200, 500, 1000, 2000, 5000, 10000, 20000)
         self.logScaleShow = (1, 0, 1, 0, 0, 1, 0, 0, 1, 0) # 0 - hide, 1- show.
         self.labelInfo = ['Data1', 'Data2', 'Data3', 'exp-data[compare]']
@@ -79,7 +78,7 @@ class PanelChart(wx.Panel):
         dc.SetPen(wx.Pen('#D5D5D5'))  # dc.SetPen(wx.Pen('#0AB1FF'))
         # Draw the Y-Axis
         dc.DrawLine(1, 1, 1, y)
-        deltY = int((y-90)//10) # <- don't replace by y//100*10 or y//10
+        deltY = int((y-90)//10)  # <- don't replace by y//100*10 or y//10
         for i in range(1,11):
             dc.DrawLine(-5, i*deltY, x, i*deltY)  # Y-Grid
             if self.displayMode == 0:  # Logarithmic scale Y-Axis
@@ -264,7 +263,6 @@ class PanelSetting(wx.Panel):
         elif gv.iChartPanel1:
             gv.iChartPanel1.updateDisplay()
         gv.iMainFame.infoWinClose(None)
-        #gv.iMainFame.onStartExp(self.mode)
 
 #--PanelSetting----------------------------------------------------------------
     def onConstruct(self, event):
@@ -300,7 +298,7 @@ class PanelSetting(wx.Panel):
 #-----------------------------------------------------------------------------
 #-----------------------------------------------------------------------------
 class PanelCPResult(wx.Panel):
-    """ Panel to show the experiment compare result."""
+    """ Panel to show the experiment ROC compare result."""
     def __init__(self, parent):
         """ Init the panel."""
         wx.Panel.__init__(self, parent, size=(620, 420))
