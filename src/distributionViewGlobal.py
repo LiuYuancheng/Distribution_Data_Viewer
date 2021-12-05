@@ -10,13 +10,14 @@
 # Copyright:   NUS-Singtel Cyber Security Research & Development Laboratory
 # License:     YC @ NUS
 #-----------------------------------------------------------------------------
-import os, sys
+import os
 dirpath = os.path.dirname(__file__)
 print("Current source code location : %s" % dirpath)
 
 #------<CONSTANTS>-------------------------------------------------------------
 # Application name and version. setting
 APP_NAME = 'NetFetcher Distribution Data Viewer'
+WINP = os.name == 'nt'
 # Program title icon
 ICON_PATH = os.path.join(dirpath, 'img', 'title.png')
 # Module folder:

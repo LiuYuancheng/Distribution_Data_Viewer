@@ -170,7 +170,7 @@ class PanelChart(wx.Panel):
 #--PanelChart------------------------------------------------------------------  
     def setLabel(self, labelList):
         """ Set the chart color label. <labelList>: the list of the CSV file's path."""
-        splitChr = '\\' #if gv.WINP else '/'
+        splitChr = '\\' if gv.WINP else '/'
         for i in range(len(labelList)):
             self.labelInfo[i] = str(labelList[i].split(splitChr)[-1])[:-3]
 
