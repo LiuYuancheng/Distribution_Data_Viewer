@@ -67,7 +67,7 @@ The main function of the Viewer
    Installation cmd: pip install -U wxPython
    ```
 
-2.  **Numpy**  https://pypi.org/project/numpy/
+2. **Numpy**  https://pypi.org/project/numpy/
 
    ```
    Installation cmd: pip install numpy
@@ -125,9 +125,13 @@ We use the compare mode as an example to show how to use the program:
 
    Fill in the data and click the "`Calibration`" button, then the related netFetcher execution configuration *.bat file will be created, then press the "BatchRun" button the netFetcher program will be executed and the related data will be put in "Model" and "data" folder. When the data calibration finished the `processing` button will change to `finish`, then press the `finish` button. 
 
-   
+2. Select the date type you want to display in the drop down menu as shown in the video: 
 
-2. Select display different type of data and the Y-Axis scale format with the drop down menu in the title bar. Currently we provide 3 kinds of Y-Axis scale: 
+   https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/Video_2019-08-22_104710.wmv
+   
+   https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/Video_2019-08-22_105055.wmv
+   
+3. Select display different type of data and the Y-Axis scale format with the drop down menu in the title bar. Currently we provide 3 kinds of Y-Axis scale: 
 
    | Y-Axis scale type       | Scale range               | Data covered               |
    | ----------------------- | ------------------------- | -------------------------- |
@@ -164,7 +168,7 @@ We use the compare mode as an example to show how to use the program:
 
 
 
-###### Use Program to Find The Best Match Data: 
+###### Use Program to Find The Best Match Data
 
 This is the receiver operating characteristic curve compare algorithm control panel used to find the best match data: 
 
@@ -229,7 +233,7 @@ Specifity: tn/(tn+fp) = 0.5040336022401494
 
 - https://ncss-wpengine.netdna-ssl.com/wp-content/themes/ncss/pdf/Procedures/NCSS/Comparing_Two_ROC_Curves-Paired_Design.pdf
 - https://github.com/chef/omnibus/blob/main/lib/omnibus/fetchers/net_fetcher.rb
-- -- 
+- 
 
 ------
 
