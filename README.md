@@ -47,32 +47,61 @@ The main function of the Viewer
 3. Calculate the current model and measured data sample set's ROC comparison value for different three kinds of data set : `data minimum diference threshold` ,  `data maximum difference threshold` , `model match to measurement true positive rate` , `model match to measurement true negative rate` , `model match to measurement false positive rate`, `model match to measurement false negative rate`, `sensitivity [true positive/(true positive+false negative)]` , `specifity [true negative/(true negative + false positive)]`
 
 4. Show the overly graph comparison result. 
+5. --
+
+
 
 ------
 
-###### Project Development Evn: 
+### Program Setup
 
-Development environment: Python3.7/(Also tested under 2.7)
+###### Development Environment : python 3.7.10
 
-Addition Lib: Wxpython, Numpy
+###### Additional Lib/Software Need
 
-This is the cmd to install 
+1. **Wxpython 4.0x** 
 
-[wxPython]: https://wxpython.org/pages/downloads/index.html:	"wxPython"
+   Intallation : https://wxpython.org/pages/downloads/index.html
 
-```
-pip install -U wxPython
-```
+   ```
+   pip install -U wxPython
+   ```
 
-This is the cmd to install 
+2.  **Numpy**
 
-[numpy]: https://pypi.org/project/numpy/:	"numpy"
+   Installation : https://pypi.org/project/numpy/
 
-```
-pip install numpy
-```
+   ```
+   pip install numpy
+   ```
 
-(The numpy should be auto-installed when you installed the wxpython)
+3. -- 
+
+###### Hardware Needed : None
+
+###### Program Files List 
+
+version: V_0.2
+
+| Program File                  | Execution Env | Description                                 |
+| ----------------------------- | ------------- | ------------------------------------------- |
+| src/distributionViewer.py     | python 3      | Program UI main frame and data manager API. |
+| src/distributionViewGlobal.py | python 3      | Function panel module.                      |
+| src/distributionViewGlobal.py | python 3      | Global parameter file.                      |
+| src/ run.bat                  |               | Windows auto run file.                      |
+| src/check_sripted_exp.bat     | netfetcher    | netfetcher check config file.               |
+| src/model_scripted_exp.bat    | netfetcher    | netfetcher model calculation config file.   |
+| src/img                       |               | Program needed image file folder.           |
+| src/data                      |               | Measurement data csv file storage folder.   |
+| src/model                     |               | Modeling data csv file storage folder.      |
+
+
+
+------
+
+### Program Usage
+
+###### Program Execution 
 
 To run the program, go/cd to the src folder and run the "distributionViewer.py" program by:
 
@@ -80,19 +109,21 @@ To run the program, go/cd to the src folder and run the "distributionViewer.py" 
 python distributionViewer.py
 ```
 
-The tested data CSV files are in the 'data' and 'model' folder, the folder structure should be:
+The tested data CSV files are in the '`data`' and '`model`' folder, the folder structure should be:
 
-![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/folderStructure.png)
+![](doc/folderStructure.png)
 
-------
+###### Program Data Display Selection
 
-###### Program Data Display Selection : 
+We use the compare mode as an example to show how to use the program: 
 
-We use the compare mode to show how to use the program: 
+1. Select data from the data source title bar: 
 
-Data source title bar: 
+   ![](doc/dataSelection.png)
 
-![](https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/2019-08-27_104832.png)
+2. 
+
+
 
 => User can select display different type of data and the Y-Axis scale format. Currently we provide 3 kinds of Y-Axis scale: 
 

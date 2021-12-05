@@ -24,7 +24,7 @@ import numpy as np
 # Import the local modules
 import distributionViewGlobal as gv
 import distributionViewPanel as dvp
-import distributionVieweBCRun as btcRun
+#import distributionVieweBCRun as btcRun
 
 UPDATE_U = 1        # update time unit for test.
 PERIODIC = 500      # update in every 500ms
