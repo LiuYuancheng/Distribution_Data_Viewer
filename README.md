@@ -1,5 +1,7 @@
 # Data Transmission Latency SIEM Log Analysis Dashboard
 
+![](doc/img/title.png)
+
 **Program Design Purpose**: The Data Transmission Latency SIEM Log Analysis Dashboard is designed to provide comprehensive visualization and analysis of data transmission latencies within a company’s network, focusing on the latency between cloud, server, and individual nodes. This dashboard aggregates delay data collected from omnibus netFetcher peer-to-peer node latency measurements. By displaying and comparing predicted latency models with real-time data, the dashboard allows for in-depth analysis using Receiver Operating Characteristic (ROC) curve comparisons. This enables the identification of deviations in transmission latency that may signal potential network security threats, such as traffic mirroring, ARP spoofing, and Man-in-the-Middle (MITM) attacks. Through these features, the dashboard enhances situational awareness and supports proactive threat detection and mitigation in networked environments.
 
 ```python
@@ -131,9 +133,9 @@ The main functions of the Viewer are outlined as follows:
 
 ### Program Setup
 
-###### Development Environment : python 3.7.10
+##### Development Environment : python 3.7.10
 
-###### Additional Lib/Software Need
+##### Additional Lib/Software Need
 
 1. **Wxpython 4.0x**  https://wxpython.org/pages/downloads/index.html
 
@@ -147,114 +149,101 @@ The main functions of the Viewer are outlined as follows:
    Installation cmd: pip install numpy
    ```
 
-3. -- 
 
-###### Hardware Needed : None
+##### Hardware Needed : None
 
-###### Program Files List 
+##### Program Files List 
 
-version: V_0.2
-
-| Program File                  | Execution Env | Description                                 |
-| ----------------------------- | ------------- | ------------------------------------------- |
-| src/distributionViewer.py     | python 3      | Program UI main frame and data manager API. |
-| src/distributionViewGlobal.py | python 3      | Function panel module.                      |
-| src/distributionViewGlobal.py | python 3      | Global parameter file.                      |
-| src/ run.bat                  |               | Windows auto run file.                      |
-| src/check_sripted_exp.bat     | netfetcher    | netfetcher check config file.               |
-| src/model_scripted_exp.bat    | netfetcher    | netfetcher model calculation config file.   |
-| src/img                       |               | Program needed image file folder.           |
-| src/data                      |               | Measurement data csv file storage folder.   |
-| src/model                     |               | Modeling data csv file storage folder.      |
+| Program File                    | Execution Env | Description                                 |
+| ------------------------------- | ------------- | ------------------------------------------- |
+| `src/distributionViewer.py`     | python 3      | Program UI main frame and data manager API. |
+| `src/distributionViewPanel.py`  | python 3      | Function panel module.                      |
+| `src/distributionViewGlobal.py` | python 3      | Global parameter file.                      |
+| `src/ run.bat`                  |               | Windows auto run file.                      |
+| `src/check_sripted_exp.bat`     | netfetcher    | netfetcher check config file.               |
+| `src/model_scripted_exp.bat`    | netfetcher    | netfetcher model calculation config file.   |
+| `src/img`                       |               | Program needed image file folder.           |
+| `src/data`                      |               | Measurement data csv file storage folder.   |
+| `src/model`                     |               | Modeling data csv file storage folder.      |
 
 
 
 ------
 
-### Program Usage
+### Program Execution and Usage
 
-###### Program Execution 
+To run the program, navigate to the `src` folder and execute `distributionViewer.py` by using the following command:
 
-To run the program, go/cd to the src folder and run the "distributionViewer.py" program by:
-
-```
+```bash
 python distributionViewer.py
 ```
 
-The tested data CSV files are in the '`data`' and '`model`' folder, the folder structure should be:
+The tested data files in CSV format are stored in the `data` and `model` folders. The folder structure should be as follows:
 
 ![](doc/folderStructure.png)
 
-###### Program Data Display Selection
+##### Program Data Display Selection
 
-We use the compare mode as an example to show how to use the program: 
+Here’s an example workflow to demonstrate how to use the program in compare mode:
 
-1. Click `setup` button to select data source from the title bar: 
+**Select Data Source**
 
-   ![](doc/dataSelection.png)
+- Click the `Setup` button to select a data source from the title bar:
 
-   Select the data set you want to display in the data set selection popup window: 
+  ![Data Source Selection](doc/dataSelection.png)
 
-   ![](doc/dataSet.png)
+- In the data selection popup window, choose the dataset you want to display: 
 
-   Fill in the data and click the "`Calibration`" button, then the related netFetcher execution configuration *.bat file will be created, then press the "BatchRun" button the netFetcher program will be executed and the related data will be put in "Model" and "data" folder. When the data calibration finished the `processing` button will change to `finish`, then press the `finish` button. 
+![](doc/dataSet.png)
 
-2. Select the date type you want to display in the drop down menu as shown in the video: 
+Fill in the required data and click the `Calibration` button. This will create the necessary execution configuration `.bat` file for the `netFetcher` module. Next, press the `BatchRun` button to execute `netFetcher`, and the resulting data will be stored in the `Model` and `data` folders. Once calibration is complete, the `Processing` button will change to `Finish`. Click `Finish` to proceed.
 
-   https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/Video_2019-08-22_104710.wmv
-   
-   https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/Video_2019-08-22_105055.wmv
-   
-3. Select display different type of data and the Y-Axis scale format with the drop down menu in the title bar. Currently we provide 3 kinds of Y-Axis scale: 
+**Select Data Type to Display**
 
-   | Y-Axis scale type       | Scale range               | Data covered               |
-   | ----------------------- | ------------------------- | -------------------------- |
-   | Logarithmic scale: 10^n | [1, 10, 100, 1000, 10000] | All data                   |
-   | Linear scale: Dynamic   | [1/10*max] *range(1, 11 ) | All data                   |
-   | Linear scale: Fixed     | 20*range(1,11)            | occurrences  less than 200 |
+- Choose the desired data type to display from the dropdown menu, as shown in the following videos:
+- video 1: https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/Video_2019-08-22_104710.wmv
+- video 2: https://github.com/LiuYuancheng/Distribution_Data_Viewer/blob/master/misc/Video_2019-08-22_105055.wmv
 
-   The fixed Y-Axis mode is shown below:
+##### Customize Y-Axis Scale Based on View Requirement 
 
-   ![](doc/fixedView.png)
+Select the Y-axis scale format using the dropdown menu in the title bar. The program supports three types of Y-axis scales:
 
+| Y-Axis scale type       | Scale range               | Data covered               |
+| ----------------------- | ------------------------- | -------------------------- |
+| Logarithmic scale: 10^n | [1, 10, 100, 1000, 10000] | All data                   |
+| Linear scale: Dynamic   | [1/10*max] *range(1, 11 ) | All data                   |
+| Linear scale: Fixed     | 20*range(1,11)            | occurrences  less than 200 |
 
+The fixed Y-axis mode is shown below:
 
-3. Click the "compare mode" check box, both the [Model] and [data] data will be drawn overlay on the model display panel: 
+![](doc/fixedView.png)
 
-   ![](doc/compare_dis_mode.png)
+**Enable Compare Mode**
 
-4. -- 
+Check the `Compare Mode` box to overlay both the `[Model]` and `[data]` sets on the model display panel:
 
-
-
-###### Program Display Config Selection 
-
-- The user can change the display setting in the button display setting bar: ![](doc/displayConfig.png)
-
-- The mode data display rate can be change in 2sec ~ 5 sec. The program will sample count and data percentile can also be changed from the drop down menu. 
-
-- Press the "`Font Selection`" button the font change window will pop-up: 
-
-  <img src="doc/fontChange.png" style="zoom: 80%;" />
-
-- Check the "Synchronized Adjust" check box the [model] and [data] display will show the same change when user change one of the data display selection setting. 
+![](doc/compare_dis_mode.png)
 
 
 
+##### Using the Program to Find the Best Match Data
 
-###### Use Program to Find The Best Match Data
-
-This is the receiver operating characteristic curve compare algorithm control panel used to find the best match data: 
+The ROC (Receiver Operating Characteristic) curve comparison tool helps find the best matching data between two sets:
 
 ![](doc/readMe2.png)
 
-**Step 1**: In the data comparison control panel, select the compare method: (Currently only have one compare method which compare 2 curve's ROC )
+**Select Comparison Method**
 
-ROC compare doc link: https://ncss-wpengine.netdna-ssl.com/wp-content/themes/ncss/pdf/Procedures/NCSS/Comparing_Two_ROC_Curves-Paired_Design.pdf
+- In the data comparison control panel, choose the comparison method (currently, only one method is available for comparing ROC curves between two datasets).
+- [Learn more about ROC Comparison](https://ncss-wpengine.netdna-ssl.com/wp-content/themes/ncss/pdf/Procedures/NCSS/Comparing_Two_ROC_Curves-Paired_Design.pdf)
 
-**Step 2**: Select the compare base data from the drop down menu.
+**Select Base Data**
 
-**Step 3**: Click the "Start to match data" button, the program will start to calculate the data's ROC and find the best sensitivity data. The orignal data will be shown in the table. 
+- Choose the base data set for comparison from the dropdown menu.
+
+**Start Data Matching**
+
+- Click the `Start to match data` button to calculate ROC values and find the optimal sensitivity. A summary of the results will appear in a table, showing key metrics like minimum and maximum thresholds, true positive and negative rates, false positives and negatives, sensitivity, and specificity, as illustrated below:
 
 ```
 Minimum Threshold: 19631.183700649814
@@ -265,39 +254,29 @@ False Positive: 11575
 False Negative: 1055
 Sensitivity: tp/(tp+fn) = 0.9646660861410677
 Specifity: tn/(tn+fp) = 0.5901639344262295
-Minimum Threshold: 209266.451635113
-Maximum Threshold: 209279.2085214074        
-True Positive: 14964
-True Negative: 15120
-False Positive: 14878
-False Negative: 15030
-Sensitivity: tp/(tp+fn) = 0.4988997799559912
-Specifity: tn/(tn+fp) = 0.5040336022401494  
 ```
 
-**Step 4**: Click the "Load to compare panel"  button, the best match data and the compare base data will be plot overlay with each other on the compare panel as shown below: 
+**Load to Compare Panel**
 
-<img src="doc/readMe3.png" style="zoom:80%;" />
+- Click `Load to compare panel` to overlay the best matching data with the base data on the comparison panel:
 
-**Step 5:**  -- 
+![](doc/readMe3.png)
 
 
 
-------
+##### Program Display Configuration
 
-### Problem and Solution
+- The user can adjust display settings in the display configuration bar:
 
-###### Problem: 
+  ![Display Configuration](doc/displayConfig.png)
 
-**OS Platform** : 
+- Data display rate can be set between 2 to 5 seconds, and the sampling count and data percentile can also be adjusted from the dropdown menu.
 
-**Error Message**: 
+- Click the `Font Selection` button to open the font settings window:
 
-**Type**: 
+  ![Font Selection](doc/fontChange.png)
 
-**Solution**:
-
-**Related Reference**:  
+- Check the `Synchronized Adjust` option to apply the same settings across both `[Model]` and `[data]` displays simultaneously.
 
 
 
@@ -307,9 +286,8 @@ Specifity: tn/(tn+fp) = 0.5040336022401494
 
 - https://ncss-wpengine.netdna-ssl.com/wp-content/themes/ncss/pdf/Procedures/NCSS/Comparing_Two_ROC_Curves-Paired_Design.pdf
 - https://github.com/chef/omnibus/blob/main/lib/omnibus/fetchers/net_fetcher.rb
-- 
 
 ------
 
-> Last edit by LiuYuancheng(liu_yuan_cheng@hotmail.com) at 05/12/2021
+> Last edit by LiuYuancheng(liu_yuan_cheng@hotmail.com) at 02/11/2024,  if you have any problem, please send me a message. 
 
