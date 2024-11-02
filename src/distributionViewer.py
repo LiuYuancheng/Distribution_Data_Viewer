@@ -10,9 +10,9 @@
 # Author:      Yuancheng Liu
 #
 # Created:     2019/08/02
-# version:     v_0.2
-# Copyright:   NUS Singtel Cyber Security Research & Development Laboratory
-# License:     YC @ NUS
+# Version:     v_0.1.1
+# Copyright:   Copyright (c) 2024 LiuYuancheng
+# License:     MIT License
 #-----------------------------------------------------------------------------
 
 import csv
@@ -431,7 +431,7 @@ class distributionViewFrame(wx.Frame):
                         Author:      Yuancheng Liu \n \
                         Email:       liu_yuan_cheng@hotmail.com \n \
                         Created:     2019/08/02 \n \
-                        Copyright:   NUS Singtel Cyber Security Research & Develo pment Laboratory \n \
+                        Copyright:   Copyright (c) 2024 LiuYuancheng \n \
                         GitHub Link: https://github.com/LiuYuancheng/Distribution_Data_Viewer \n', 
                     'Help', wx.OK)
 

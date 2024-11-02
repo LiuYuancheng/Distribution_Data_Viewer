@@ -1,34 +1,82 @@
-# Distribution_Data_Viewer
+# Data Transmission Latency SIEM Log Analysis Dashboard
 
-**Program Design Purpose**: We have collected some distribute delay(time interval) data when using the **[ omnibus](https://github.com/chef/omnibus)** netFetcher module to query big data from client computer from the server.  We want to visualized these different kinds of delay data, do graph comparison between the model prediction and real data with the receiver operating characteristic curve compare algorithm.
+**Program Design Purpose**: The Data Transmission Latency SIEM Log Analysis Dashboard is designed to provide comprehensive visualization and analysis of data transmission latencies within a company’s network, focusing on the latency between cloud, server, and individual nodes. This dashboard aggregates delay data collected from omnibus netFetcher peer-to-peer node latency measurements. By displaying and comparing predicted latency models with real-time data, the dashboard allows for in-depth analysis using Receiver Operating Characteristic (ROC) curve comparisons. This enables the identification of deviations in transmission latency that may signal potential network security threats, such as traffic mirroring, ARP spoofing, and Man-in-the-Middle (MITM) attacks. Through these features, the dashboard enhances situational awareness and supports proactive threat detection and mitigation in networked environments.
+
+**Table of Contents**
 
 [TOC]
 
-
+------
 
 ### Introduction 
 
-This project will create a distribution data viewer to visualize the experiment result of the netFetcher. The netFetcher will record different kinds of delay when loading big files (such as the Ubuntu ISO img) from different servers. The distribution viewer will load all the experiment CSV files and create the related distribution curves. The distribution viewer program will also provide a comparison function to find the best match data and display the compare result with the receiver operating characteristic(ROC) curve compare algorithm.
+The **Data Transmission Latency Log Distribution Data Viewer** project aims to create a specialized tool for visualizing and analyzing experimental network latency data captured by the netFetcher module. This module is used to record various delay metrics across different file types—ranging from small files (such as an images file) to large files (such as Ubuntu ISO file), while downloading from multiple servers. By visualizing this data, the Distribution Data Viewer will provide insights into the latency behaviors associated with different file sizes and transfer conditions.
+
+The tool supports comprehensive visualization features, allowing users to load and plot experimental data from multiple CSV files. Using this data, the Viewer generates distribution curves and includes a comparison functionality to help users find the best-matching data set. This comparison employs a Receiver Operating Characteristic (ROC) curve algorithm, enabling effective performance assessment of latency predictions against actual measurements. The key feature includes:
+
+- **Latency Visualization**: To display the captured network latency data across various network segments, including cloud-to-router, router-to-switch, and switch-to-peer transfers. This data is sourced from Fortinet Firewire, internal network switches, and the Omnibus netFetcher module.
+- **Model vs. Real Data Comparison**: To implement a Receiver Operating Characteristic (ROC) comparison algorithm that contrasts actual latency data with predictive model outputs. This helps in identifying abnormal data transmission patterns.
+- **Anomaly Detection for Security**: By benchmarking current latency against normal patterns, the system aims to detect and alert for potential security threats such as traffic mirroring, ARP spoofing, and Man-in-the-Middle (MITM) attacks.
 
 
 
-#### Distribution Data Viewer Main UI
+#### **Distribution Data Viewer Main UI**
 
-The user can select **normal parallel display mode** and **compare overlay mode** by change the `iCPMod` flag in the globale file`distributionViewGlobal.py` . The compare mode Main UI is shown below:
+The main UI of the Distribution Data Viewer provides two primary display modes, controlled by the `iCPMod` flag in the global configuration file `distributionViewGlobal.py`:
+
+**Normal Parallel Display Mode**: This mode presents measured latency data at the top of the screen, with calculated values displayed at the bottom for straightforward comparison. The screen shot is shown below:
 
 ![](doc/distrubution_UI.gif)
 
-**Normal parallel display mode** will show the netFetcher module measured data at the top panel and show the the calculated data at the bottom panel:
+
+
+**Compare Overlay Mode**: This mode overlays both the measured and calculated data on a single graph, allowing for direct visual comparison of the distribution patterns. The screen shot is shown below:
 
 ![](doc/normal_dis_mode.png)
 
-**Compare overlay mode** will overly the module measured data and self calculated data in one graph: 
-
-![](doc/compare_dis_mode.png)
 
 
+------
 
-version: v_0.2
+### Data Sources Detail
+
+The data is collected from firewall router, internal switch and the download node, there are 6 types of data to be collected: 
+
+**Type 0: Timestamping difference** 
+
+Clock difference between firewall device, internal switch and the download computer to make sure all the logs data a use the same time standard. 
+
+**Type 1: Server Request Preprocessing Delay** 
+
+We use ping to get the server response time t0, then record the time value t1 between we send the download request get the download response, then user t1 - t0 to get the time of server processing the download request. 
+
+![](doc/img/rm_05.png)
+
+
+
+**Type 2: Firewall transmission latency**
+
+The time interval between firewall send the download to outside to the firewall accept the download response from the file server.  If this data get big difference between module and log, which means there may be MiTM, or traffic mirroring attack between the firewall and the download server. 
+
+**Type 3: Internal switch transmission latency**
+
+The time interval between the switch send the download to firewall to the switch accept the download response from the firewall.   If the type 2 distribution is normal and this data get big difference between module and log, which means there may be MiTM, or traffic mirroring attack between the firewall and the switch. 
+
+**Type 4: Download Client Observed Delay** 
+
+The time interval between the download client send to the internal switch to the download client get the download response from the internal switch. If the type 3 distribution is normal and this data get big difference between module and log, which means there may be MiTM, or traffic mirroring attack between the switch and the download node. 
+
+**Type 5: I/O and Transfer Delay** 
+
+Sum of Types 2 and 3, including network delay 
+
+
+
+------
+
+
+
+
 
 #### Program Main Function
 

@@ -9,8 +9,9 @@
 # Author:      Yuancheng Liu
 #
 # Created:     2019/08/02
-# Copyright:   NUS-Singtel Cyber Security Research & Development Laboratory
-# License:     YC @ NUS
+# Version:     v_0.1.1
+# Copyright:   Copyright (c) 2024 LiuYuancheng
+# License:     MIT License
 #-----------------------------------------------------------------------------
 
 import wx

@@ -6,9 +6,9 @@
 # Author:      Yuancheng Liu
 #
 # Created:     2019/08/01
-# version:     V_0.2
-# Copyright:   NUS-Singtel Cyber Security Research & Development Laboratory
-# License:     YC @ NUS
+# Version:     v_0.1.1
+# Copyright:   Copyright (c) 2024 LiuYuancheng
+# License:     MIT License
 #-----------------------------------------------------------------------------
 import os
 dirpath = os.path.dirname(__file__)
@@ -16,7 +16,7 @@ print("Current source code location : %s" % dirpath)
 
 #------<CONSTANTS>-------------------------------------------------------------
 # Application name and version. setting
-APP_NAME = 'NetFetcher Distribution Data Viewer'
+APP_NAME = 'Data Transmission Latency SIEM Log Distribution Data Viewer'
 WINP = os.name == 'nt'
 # Program title icon
 ICON_PATH = os.path.join(dirpath, 'img', 'title.png')
