@@ -48,11 +48,11 @@ class distributionViewFrame(wx.Frame):
         self.updateLock = True  # lock flag of main program update.
         self.synAdjust = True   # synchronize adjustment on 2 display panels.
         self.displayChoice = \
-            ('Type 0: Timestamping Delay',
-             'Type 1: Preprocessing Delay',
-             'Type 2: Disk Seek Delay',
-             'Type 3: Disk Read Delay',
-             'Type 4: Client Observed Delay',
+            ('Type 0: Timestamping Difference',
+             'Type 1: Server Request Preprocessing Delay',
+             'Type 2: Firewall Transmission Latency',
+             'Type 3: Internal Switch Transmission Latency',
+             'Type 4: Download Client Observed Delay',
              'Type 5: Input/Output Delay (Type 2 + Type 3)')
         # Init the frame UI.
         menubar = wx.MenuBar()  # Creat the function menu bar.

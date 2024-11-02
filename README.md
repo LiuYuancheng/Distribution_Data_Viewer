@@ -2,6 +2,13 @@
 
 **Program Design Purpose**: The Data Transmission Latency SIEM Log Analysis Dashboard is designed to provide comprehensive visualization and analysis of data transmission latencies within a company’s network, focusing on the latency between cloud, server, and individual nodes. This dashboard aggregates delay data collected from omnibus netFetcher peer-to-peer node latency measurements. By displaying and comparing predicted latency models with real-time data, the dashboard allows for in-depth analysis using Receiver Operating Characteristic (ROC) curve comparisons. This enables the identification of deviations in transmission latency that may signal potential network security threats, such as traffic mirroring, ARP spoofing, and Man-in-the-Middle (MITM) attacks. Through these features, the dashboard enhances situational awareness and supports proactive threat detection and mitigation in networked environments.
 
+```python
+# Version:     v0.1.2
+# Created:     2024/11/01
+# Copyright:   Copyright (c) 2024 LiuYuancheng
+# License:     MIT License 
+```
+
 **Table of Contents**
 
 [TOC]
@@ -20,7 +27,7 @@ The tool supports comprehensive visualization features, allowing users to load a
 
 
 
-#### **Distribution Data Viewer Main UI**
+#### Distribution Data Viewer Main UI
 
 The main UI of the Distribution Data Viewer provides two primary display modes, controlled by the `iCPMod` flag in the global configuration file `distributionViewGlobal.py`:
 
@@ -40,64 +47,83 @@ The main UI of the Distribution Data Viewer provides two primary display modes, 
 
 ### Data Sources Detail
 
-The data is collected from firewall router, internal switch and the download node, there are 6 types of data to be collected: 
+The data for this project is collected from three critical network components: the firewall router, internal network switch, and download client node. Six types of latency metrics are gathered, each offering insights into potential network issues or security threats:
 
-**Type 0: Timestamping difference** 
+##### Type 0: Timestamping Difference
 
-Clock difference between firewall device, internal switch and the download computer to make sure all the logs data a use the same time standard. 
+- Measures clock discrepancies across the firewall, internal switch, and download computer to ensure that all logs are synchronized to a unified time standard. This alignment is essential for accurate latency comparisons.
 
-**Type 1: Server Request Preprocessing Delay** 
+##### Type 1: Server Request Preprocessing Delay
 
-We use ping to get the server response time t0, then record the time value t1 between we send the download request get the download response, then user t1 - t0 to get the time of server processing the download request. 
+- To measure server response time, we first ping the server to record an initial response time `t0`. Then, the interval `t1 − t0` is calculated by measuring the time `t1`, from sending the download request to receiving the response, yielding the server’s processing delay.
+- The measurement procedure detail diagram is shown below:
 
 ![](doc/img/rm_05.png)
 
+##### Type 2: Firewall Transmission Latency
+
+- This captures the time taken by the firewall to process outgoing download requests and receive responses from the external server. The latency is defined as the interval `t1−t0`, where `t0` is the send time and `t1` is the receive time. A significant deviation between model predictions (normal situation) and logged values may indicate a potential MITM or traffic mirroring attack occurred between the firewall and the download server.
+- The measurement procedure detail diagram is shown below:
+
+![](doc/img/rm_06.png)
+
+##### Type 3: Internal Switch Transmission Latency
+
+- Measures the time taken for the internal switch to relay download requests to the firewall and receive responses back. This interval is represented as `t3−t2`. If the firewall latency (Type 2) appears normal but this metric shows anomalies, it may suggest a MITM or traffic mirroring attack between the firewall and the switch.
+- The measurement procedure detail diagram is shown below:
+
+![](doc/img/rm_07.png)
+
+##### Type 4: Download Client Observed Delay
+
+- The time interval between the client sending a request to the internal switch and receiving the response. Calculated as `t5−t4`, this metric provides insights into end-to-end delay observed at the download client. If other latencies appear stable but this metric diverges, it may indicate a MITM or traffic mirroring attack between the switch and the download node.
+- The measurement procedure detail diagram is shown below:
+
+![](doc/img/rm_08.png)
 
 
-**Type 2: Firewall transmission latency**
 
-The time interval between firewall send the download to outside to the firewall accept the download response from the file server.  If this data get big difference between module and log, which means there may be MiTM, or traffic mirroring attack between the firewall and the download server. 
+##### Type 5: I/O and Transfer Delay
 
-**Type 3: Internal switch transmission latency**
+- This is the cumulative delay from Types 2 and 3, including additional network transfer times, providing an overall view of data transfer latency.
 
-The time interval between the switch send the download to firewall to the switch accept the download response from the firewall.   If the type 2 distribution is normal and this data get big difference between module and log, which means there may be MiTM, or traffic mirroring attack between the firewall and the switch. 
-
-**Type 4: Download Client Observed Delay** 
-
-The time interval between the download client send to the internal switch to the download client get the download response from the internal switch. If the type 3 distribution is normal and this data get big difference between module and log, which means there may be MiTM, or traffic mirroring attack between the switch and the download node. 
-
-**Type 5: I/O and Transfer Delay** 
-
-Sum of Types 2 and 3, including network delay 
+This revised description emphasizes the purpose and implications of each data type, offering a clearer view of how each metric contributes to understanding network health and security.
 
 
 
 ------
 
+### System Design 
 
+The Data Transmission Latency SIEM Log Analysis Dashboard is designed to visualize and analyze data transmission delays to detect potential network security issues, such as Man-in-the-Middle (MitM) attacks or traffic mirroring. By comparing observed latency data with expected "normal" latency distributions, the system can highlight significant deviations that indicate abnormal network behavior, as shown in the diagram below: 
 
+ ![](doc/img/rm_09.png)
 
+When an attack like MitM occurs, the network traffic is rerouted through an attacker’s node before reaching the user’s device, introducing a noticeable increase in transmission latency. This system aims to capture and visualize such delays to support timely detection and response. The system workflow diagram is shown below:
 
-#### Program Main Function
+![](doc/img/rm_10.png)
 
-The main function of the Viewer 
+**Attack Scenarios and Latency Indicators:**
 
-1. Visualize different kinds of delay data with different data sampling rate. 
+1. **Firewall Transmission Latency:** A significant discrepancy between the measured and expected firewall transmission latency could indicate a MitM or traffic mirroring attack between the firewall and the download server.
+2. **Internal Switch Transmission Latency:** If the firewall latency distribution appears normal, but the internal switch latency shows abnormal discrepancies, this may point to a potential attack between the firewall and the switch.
+3. **Download Client Observed Delay:** If both firewall and switch latencies are within normal ranges, but the client-observed latency is abnormal, this could indicate an attack between the switch and the download computer.
 
-   | The data viewer will show 6 types of file transfer delay data which collected by the netFetcher program: |
-   | ------------------------------------------------------------ |
-   | Type 0: Timestamping Delay [Time clock delay/difference between server and client.] |
-   | Type 1: Download Server Request Preprocessing Delay          |
-   | Type 2: Download Server Disk Seek Delay                      |
-   | Type 3: Download Server Disk Read Delay                      |
-   | Type 4: Client Observed Delay (Time[get the download package] - Time[send the download request] ) |
-   | Type 5:I/O+transfer Delay (Type 2 + Type 3 + Network delay)  |
+#### Program Main Function Design
 
-2. Dynamically update the data view, line style, percentile of data, font format. 
-3. Calculate the current model and measured data sample set's ROC comparison value for different three kinds of data set : `data minimum diference threshold` ,  `data maximum difference threshold` , `model match to measurement true positive rate` , `model match to measurement true negative rate` , `model match to measurement false positive rate`, `model match to measurement false negative rate`, `sensitivity [true positive/(true positive+false negative)]` , `specifity [true negative/(true negative + false positive)]`
+The main functions of the Viewer are outlined as follows:
 
-4. Show the overly graph comparison result. 
-5. --
+**Dynamic Data Visualization:** The viewer dynamically updates the data view, including line styles, percentile display, and font formatting, to ensure clear presentation of latency distribution data.
+
+**ROC-Based Data Comparison:** Using Receiver Operating Characteristic (ROC) curve analysis, the viewer calculates and compares the current sample set’s performance metrics with the model data to determine the likelihood of attacks. This includes calculating values such as:
+
+- **Minimum and Maximum Difference Thresholds**
+- **True Positive and True Negative Rates**
+- **False Positive and False Negative Rates**
+- **Sensitivity**: Sensitivity = `True Positive / (True Positive+False Negative)`
+- **Specificity**: Specificity = `True Negative/ (True Negative+False Positive)` 
+
+**Overlay Graph Comparison Results:** The viewer overlays graphs of normal and current latency distributions, providing a visual representation of discrepancies. This is essential for highlighting potential anomalies caused by network attacks.
 
 
 
