@@ -17,6 +17,30 @@
 
 [TOC]
 
+- [Data Transmission Latency SIEM Log Analysis Dashboard](#data-transmission-latency-siem-log-analysis-dashboard)
+    + [Introduction](#introduction)
+      - [Distribution Data Viewer Dashboard Main UI](#distribution-data-viewer-dashboard-main-ui)
+    + [Data Sources Detail](#data-sources-detail)
+        * [Type 0: Timestamping Difference](#type-0--timestamping-difference)
+        * [Type 1: Server Request Preprocessing Delay](#type-1--server-request-preprocessing-delay)
+        * [Type 2: Firewall Transmission Latency](#type-2--firewall-transmission-latency)
+        * [Type 3: Internal Switch Transmission Latency](#type-3--internal-switch-transmission-latency)
+        * [Type 4: Download Client Observed Delay](#type-4--download-client-observed-delay)
+        * [Type 5: I/O and Transfer Delay](#type-5--i-o-and-transfer-delay)
+    + [System Design](#system-design)
+      - [Program Main Function Design](#program-main-function-design)
+    + [Program Setup](#program-setup)
+        * [Development Environment : python 3.7.10](#development-environment---python-3710)
+        * [Additional Lib/Software Need](#additional-lib-software-need)
+        * [Hardware Needed : None](#hardware-needed---none)
+        * [Program Files List](#program-files-list)
+    + [Program Execution and Usage](#program-execution-and-usage)
+        * [Program Data Display Selection](#program-data-display-selection)
+        * [Customize Y-Axis Scale Based on View Requirement](#customize-y-axis-scale-based-on-view-requirement)
+        * [Using the Program to Find the Best Match Data](#using-the-program-to-find-the-best-match-data)
+        * [Program Display Configuration](#program-display-configuration)
+    + [Reference Links](#reference-links)
+
 ------
 
 ### Introduction 
